@@ -13,7 +13,7 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | 方向：無人機仿生旋翼 | BIO-20261125-0151 |
 | 前人研究、商業產品 | BIO-20261125-0152 |
 | 組內六個構想原文 | BIO-20261125-0153 |
-| 流體模擬方法、CFD、能不能跑 | BIO-20261125-0154 |
+| 流體模擬方法、CFD、能不能跑 | BIO-20261125-0154, BIO-20261125-0301 |
 | 規格、成功標準、基準槳、分工（grill） | BIO-20261125-0207 |
 
 ## Cards
@@ -27,3 +27,4 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261125-0153 | 2026-11-25 | source | valid | The group's six top-voted ideas plus the leader's boat example — transcript without names | six-ideas, source |
 | BIO-20261125-0154 | 2026-11-25 | research | valid | Fluid simulation methods for rotors — BEMT to LBM, trade-offs, gaps to reality, what this hardware can run | cfd, simulation, aeroacoustics |
 | BIO-20261125-0207 | 2026-11-25 | decision | valid | Grill round 1: all six recommendations accepted — simulation pipeline as prototype, -2 dB target, UIUC baseline | grill, scope, success-criteria |
+| BIO-20261125-0301 | 2026-11-25 | decision | valid | Where each simulation runs, given the laptop's RTX 3060 — BEMT in cloud, FluidX3D on laptop, OpenFOAM on hold | hardware, simulation-plan, fluidx3d |
