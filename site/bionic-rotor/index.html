@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>仿生靜音旋翼</title>
+<meta name="description" content="仿生科技組內六個構想融合成一支無人機旋翼：前人研究、流體模擬方法比較與模擬計畫。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="../../style.css">
+<style>
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:1em 0}
+.flow .panel{margin:0}
+.flow b{display:block;margin-bottom:.2em}
+.flow small{color:var(--muted)}
+.tag{display:inline-block;font-size:.72rem;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);margin-left:4px;white-space:nowrap}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:500}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="../">← 仿生科技</a>
+  <h1>仿生靜音旋翼</h1>
+  <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
+
+  <div class="flow">
+    <div class="panel"><b>前緣：大翅鯨胸鰭</b><small>瘤狀突起，延遲失速</small></div>
+    <div class="panel"><b>前緣＋尾緣：貓頭鷹羽毛</b><small>梳齒與鋸齒，降低寬頻噪音</small></div>
+    <div class="panel"><b>表面：鯊魚皮</b><small>順流微溝槽，降低摩擦、減少沾灰（溝槽也可做抗菌）</small></div>
+    <div class="panel"><b>機身或導流罩：翠鳥喙</b><small>截面平滑放大，減少壓力突變</small></div>
+  </div>
+  <p class="lead">目前狀態：先做模擬，3D 列印由其他組員負責。<span class="tag">2026-11-25</span></p>
+
+  <h2>前人做過什麼</h2>
+  <details>
+    <summary>結論：貓頭鷹鋸齒槳已有很多研究；鯨魚瘤突用在小槳上，結果好壞參半；鯊魚溝槽只有用在機翼上的研究；三種結構合在一起的旋翼還沒找到</summary>
+    <div class="tbl"><table>
+      <tr><th>構想</th><th>研究</th><th>結果</th></tr>
+      <tr><td>貓頭鷹前緣＋尾緣鋸齒</td><td><a href="https://www.ebsco.com/articles/chemistry/a2779745-54b9-5e5a-a4fc-1d678df0ef2d/experimental-investigation-of-a-biomimetic-propeller-coupled-with-owl-inspired-leading-and-trailing-edges-serrations">Physics of Fluids 2025</a></td><td>聲功率最多降低 3.1 dB，推力效率提高 7.9%<span class="tag">REF</span></td></tr>
+      <tr><td>貓頭鷹＋蟬翼 3D 鋸齒</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11109230/">Nature Communications 2024</a></td><td>降噪，同時盡量不犧牲推力；專利可授權<span class="tag">REF</span></td></tr>
+      <tr><td>鋸齒尾緣</td><td><a href="https://repository.tudelft.nl/record/uuid:a6546218-4869-4366-a465-f07aa2e39a99">TU Delft，測試 23 支槳</a></td><td>寬頻噪音降低<span class="tag">REF</span></td></tr>
+      <tr><td>大翅鯨瘤突</td><td><a href="https://scholarsarchive.byu.edu/facpub/1683">BYU 2016</a></td><td>小槳加上瘤突後，推力和效率都下降<span class="tag">REF</span></td></tr>
+      <tr><td>鯊魚溝槽</td><td><a href="https://ouci.dntb.gov.ua/works/4NBe1nv4">用在 UAV 機翼的實驗</a></td><td>摩擦阻力最多降低 8%；沒找到用在旋翼的研究<span class="tag">REF</span></td></tr>
+      <tr><td>商業產品</td><td><a href="https://www.ll.mit.edu/doc/toroidal-propeller">MIT 環形槳</a>、DJI 低噪槳</td><td>都不是仿生鋸齒設計；市面上沒找到貓頭鷹鋸齒槳<span class="tag">AI likely</span></td></tr>
+    </table></div>
+    <p><small>以上只讀了論文摘要，沒有讀全文。</small></p>
+  </details>
+
+  <h2>流體模擬怎麼做</h2>
+  <details>
+    <summary>結論：先用 BEMT 快速篩選設計，再用 RANS 比較推力；噪音要準，需要 LES 或 LBM，學生電腦跑不動</summary>
+    <div class="tbl"><table>
+      <tr><th>方法</th><th>做法</th><th>速度</th><th>看得到鋸齒、瘤突嗎</th></tr>
+      <tr><td>BEMT 葉素動量理論</td><td>把葉片切成很多小段，每段查 2D 翼型資料，再和動量守恆一起迭代求解</td><td>幾秒</td><td>只能間接放進去</td></tr>
+      <tr><td>渦粒子法 rVPM</td><td>葉片簡化成一條線，尾流用帶渦量的粒子表示</td><td>幾分鐘到幾小時</td><td>只能間接放進去</td></tr>
+      <tr><td>RANS</td><td>解時間平均的 Navier–Stokes 方程式，紊流用模型代替</td><td>幾小時到一天</td><td>看得到外形，看不到寬頻噪音</td></tr>
+      <tr><td>LES / DES</td><td>直接解大尺度渦流，小尺度用模型代替</td><td>幾天以上，要用叢集</td><td>看得到</td></tr>
+      <tr><td>LBM 晶格波茲曼</td><td>在格點上模擬粒子的碰撞和移動</td><td>需要 GPU</td><td>看得到，業界拿它當噪音的參考解</td></tr>
+      <tr><td>AI 代理模型</td><td>用大量 CFD 結果訓練神經網路</td><td>幾毫秒</td><td>遇到訓練資料以外的新形狀就不準</td></tr>
+    </table></div>
+    <p>算噪音時，會把流場結果代入 FW-H 聲學類比，算出遠處聽到的聲音。<span class="tag">AI likely</span></p>
+  </details>
+  <details>
+    <summary>模擬和現實的差距</summary>
+    <ul>
+      <li>無人機槳屬於低雷諾數，流動會從層流轉成紊流，翼型資料和 RANS 在這裡誤差都很大。<span class="tag">AI likely</span></li>
+      <li>3D 列印的層紋本身就是一種粗糙度，可能把鯊魚溝槽的效果蓋過去。<span class="tag">AI likely</span></li>
+      <li>真正飛行時的噪音，各種模擬方法都低估了（<a href="https://elib.dlr.de/222879/1/ELIB-Eintrag-2026-DomogallaV-222879-PaperPublished.pdf">DLR 2026</a>）。<span class="tag">REF</span></li>
+      <li>模擬通常只算槳本身；實際量測還會混進馬達和機架的聲音，以及房間的反射音。<span class="tag">AI likely</span></li>
+    </ul>
+  </details>
+
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan</footer>
+</main>
+</body>
+</html>

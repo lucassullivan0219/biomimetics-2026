@@ -1,0 +1,5 @@
+# Merge rules (project-framework PF-0022, PF-0029). Two sessions can append to the same file at once.
+# union keeps both sides' new lines instead of a conflict. Since v0.2 card IDs are Asia/Taipei times,
+# two sessions rarely make the same ID, so INDEX.md merges with union too. After a merge, check the topic table for doubled rows.
+zettelkasten/log/*.md merge=union
+zettelkasten/INDEX.md merge=union
