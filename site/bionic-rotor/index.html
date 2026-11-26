@@ -4,23 +4,76 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>仿生靜音旋翼</title>
-<meta name="description" content="仿生科技組內六個構想融合成一支無人機旋翼：前人研究、流體模擬方法比較與模擬計畫。">
+<meta name="description" content="仿生科技組內六個構想融合成一支無人機旋翼：進度、3D 模型、BEMT 模擬的假設、參數與驗證結果。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="../../style.css">
 <style>
+:root{
+  --surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted2:#898781;--grid:#e1e0d9;--axis:#c3c2b7;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--ok:#0ca30c;--todo:#c3c2b7;
+}
+@media(prefers-color-scheme:dark){:root{
+  --surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted2:#898781;--grid:#2c2c2a;--axis:#383835;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--todo:#4a4a46;
+}}
 .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:1em 0}
 .flow .panel{margin:0}
 .flow b{display:block;margin-bottom:.2em}
 .flow small{color:var(--muted)}
-.tag{display:inline-block;font-size:.72rem;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);margin-left:4px;white-space:nowrap}
+.tag{display:inline-block;font-size:.72rem;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);margin-left:4px;white-space:nowrap;font-weight:400}
 details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
+details details{background:transparent}
 summary{cursor:pointer;font-weight:500}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.6em 0}
 th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
 th{color:var(--muted);font-weight:500}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+code{font-size:.85em;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;font-size:.82rem;line-height:1.5}
+.oneline{font-size:1.05rem;margin:.2em 0 1em}
+
+/* progress */
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--line);margin-left:7px}
+.timeline li{position:relative;padding:4px 0 10px 20px}
+.timeline li::before{content:"";position:absolute;left:-8px;top:10px;width:14px;height:14px;border-radius:50%;background:var(--todo);border:2px solid var(--bg)}
+.timeline li.done::before{background:var(--ok)}
+.timeline li.now::before{background:var(--accent)}
+.timeline .d{color:var(--muted);font-size:.85rem;margin-right:6px;font-variant-numeric:tabular-nums}
+
+/* 3D viewer */
+.viewer{position:relative;height:440px;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none}
+.viewer canvas{width:100%!important;height:100%!important;border:0;border-radius:0;background:transparent;display:block}
+.viewer.fs{position:fixed;inset:0;height:auto;z-index:100;border-radius:0}
+.viewer:fullscreen{height:100%;border-radius:0}
+.vbar{position:absolute;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.vbar button{font:inherit;font-size:.82rem;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.vbar button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.vhint{position:absolute;left:10px;bottom:8px;font-size:.78rem;color:var(--muted)}
+.vload{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:.9rem;pointer-events:none}
+
+/* charts */
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:12px 0}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 12px 6px;position:relative}
+.chart h4{margin:0 0 2px;font-size:.92rem;font-weight:500;color:var(--ink)}
+.chart .sub{margin:0 0 6px;font-size:.78rem;color:var(--ink2)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--ink2);margin:0 0 4px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart svg:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.chart .tick{font-size:10px;fill:var(--muted2);font-variant-numeric:tabular-nums}
+.chart .axlab{font-size:11px;fill:var(--ink2)}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:.76rem;box-shadow:0 2px 10px rgba(0,0,0,.12);display:none;z-index:5;min-width:120px}
+.tip .x{color:var(--ink2);margin-bottom:2px}
+.tip .row{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tip .row b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.tip .row i{color:var(--ink2);font-style:normal}
+.chart details{border:0;padding:0;margin:4px 0 0;background:transparent}
+.chart details summary{font-size:.76rem;font-weight:400;color:var(--muted)}
+.chart table{font-size:.76rem}
+.eq{font-family:"IBM Plex Sans",system-ui,sans-serif;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:.6em 0;overflow-x:auto;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -29,17 +82,237 @@ th{color:var(--muted);font-weight:500}
   <h1>仿生靜音旋翼</h1>
   <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
 
-  <div class="flow">
-    <div class="panel"><b>前緣：大翅鯨胸鰭</b><small>瘤狀突起，延遲失速</small></div>
-    <div class="panel"><b>前緣＋尾緣：貓頭鷹羽毛</b><small>梳齒與鋸齒，降低寬頻噪音</small></div>
-    <div class="panel"><b>表面：鯊魚皮</b><small>順流微溝槽，降低摩擦、減少沾灰（溝槽也可做抗菌）</small></div>
-    <div class="panel"><b>機身或導流罩：翠鳥喙</b><small>截面平滑放大，減少壓力突變</small></div>
-  </div>
-  <p class="lead">目前狀態：先做模擬，3D 列印由其他組員負責。<span class="tag">2026-11-25</span></p>
+  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬程式已經跟大學風洞實測對過，推力誤差約 5–7%；3D 模型也做好了，下一步是校正阻力，然後加入鯨魚瘤突和貓頭鷹鋸齒。<span class="tag">2026-11-26</span></p>
 
-  <h2>前人做過什麼</h2>
+  <ol class="timeline">
+    <li class="done"><span class="d">11/24</span>選方向：無人機仿生旋翼（不做電風扇、不做小船）<span class="tag">AGREED</span></li>
+    <li class="done"><span class="d">11/25</span>定規格：同推力下降噪 2 dB 以上、推力損失小於 5%，基準槳從 UIUC 資料庫挑<span class="tag">AGREED</span></li>
+    <li class="done"><span class="d">11/26</span>找需求證據：外送無人機的噪音投訴、歐盟噪音上限<span class="tag">REF</span></li>
+    <li class="done"><span class="d">11/26</span>寫 BEMT 模擬程式，跟 UIUC 實測對答案<span class="tag">SIM</span></li>
+    <li class="done"><span class="d">11/26</span>基準槳 3D CAD 模型（下方可旋轉、放大、全螢幕）</li>
+    <li class="now"><span class="d">下一步</span>校正阻力，讓模擬的功率對上實測<span class="tag">OPEN</span></li>
+    <li><span class="d">之後</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳</li>
+    <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
+    <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
+  </ol>
+
+  <h2>3D 模型：基準槳 DA4002 5×3.75</h2>
+  <div class="viewer" id="viewer" role="application" aria-label="螺旋槳 3D 模型，可拖曳旋轉、縮放">
+    <div class="vload" id="vload">載入模型中…（約 8 MB）</div>
+    <div class="vbar">
+      <button id="vFull" type="button">全螢幕</button>
+      <button id="vReset" type="button">重設視角</button>
+      <button id="vSpin" type="button" aria-pressed="false">自動旋轉</button>
+      <button id="vWire" type="button" aria-pressed="false">網格線</button>
+    </div>
+    <div class="vhint">拖曳：旋轉 · 滾輪或雙指：縮放 · 右鍵或雙指拖曳：平移</div>
+  </div>
+  <p><small>這支是 UIUC 設計並 3D 列印測試過的 5 吋雙葉槳，用真實翼型和實測的弦長、扭角建出來，還沒有加仿生特徵。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.step">STEP</a>（CAD 用）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.3mf">3MF</a>（切片軟體用）、<a href="models/da4002_5x3.75.glb">GLB</a>。</small></p>
   <details>
-    <summary>結論：貓頭鷹鋸齒槳已有很多研究；鯨魚瘤突用在小槳上，結果好壞參半；鯊魚溝槽只有用在機翼上的研究；三種結構合在一起的旋翼還沒找到</summary>
+    <summary>這個模型怎麼做的、做了哪些假設、能不能直接印</summary>
+    <h3>工具：text-to-cad 的 cad skill</h3>
+    <ul>
+      <li>先搜尋網路上的 Claude 建模 skill（2026-11-26）：
+        <ul>
+          <li>飛行器專用：<a href="https://www.skillsdirectory.com/skills/ashfordeou-openvsp-geometry">openvsp-geometry</a>（Aero Agent Skills）。讀了它的 SKILL.md：它只算機翼面積、平均氣動弦這類數字，<b>不產生 3D 模型</b>，所以不適用。<span class="tag">OBS Claude 2026-11-26</span></li>
+          <li>通用 CAD：<a href="https://github.com/earthtojake/text-to-cad">earthtojake/text-to-cad</a>，MIT 授權，約 2.7 萬顆星，用 build123d 寫參數化 CAD，可輸出 STEP、STL、3MF、GLB，也有列印可行性檢查。<span class="tag">REF</span></li>
+          <li>保底選項：<a href="https://github.com/elvarofficial/teardown">teardown</a>，偏向「可拆解的機器示意動畫」，不是精確幾何。<span class="tag">REF</span></li>
+        </ul>
+      </li>
+      <li>選 text-to-cad：它能把翼型截面沿真實尺寸放樣成實體，STEP 也能直接交給組員列印。<span class="tag">AI likely</span></li>
+      <li>照 skill 的流程：用 <code>cad run</code> 建模，用 <code>cad model inspect</code> 量尺寸，用 <code>cad model snapshot</code> 看外觀，用 <code>cad model dfm</code> 檢查能不能列印，最後用 <code>cad model export</code> 匯出。<span class="tag">OBS Claude 2026-11-26，cad 0.11.17</span></li>
+      <li>程式碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/cad/da4002_prop.py"><code>cad/da4002_prop.py</code></a></li>
+    </ul>
+    <h3>幾何來源和參數</h3>
+    <div class="tbl"><table>
+      <tr><th>項目</th><th>數值</th><th>來源</th></tr>
+      <tr><td>直徑</td><td>5 in = 127 mm（R = 63.5 mm）</td><td>UIUC<span class="tag">REF</span></td></tr>
+      <tr><td>葉片數</td><td>2</td><td>UIUC<span class="tag">REF</span></td></tr>
+      <tr><td>弦長 c/R、扭角 β</td><td>18 個量測站，r/R 0.15–1.00（下方「步驟 3」有圖）</td><td>UIUC 量測的實際列印件 <code>da4002_5x3.75_geom.txt</code><span class="tag">REF</span></td></tr>
+      <tr><td>翼型</td><td>SDA1075，最大厚度 12%，整支同一個翼型</td><td><a href="https://m-selig.ae.illinois.edu/pubs/DetersAnandaSelig-2014-AIAA-2014-2151.pdf">Deters, Ananda &amp; Selig 2014</a> 附錄 Table 4<span class="tag">REF</span></td></tr>
+      <tr><td>截面疊放位置</td><td>各截面的 1/4 弦長點排在同一條徑向直線上（無後掠、無前傾）</td><td>假設<span class="tag">AI possible</span></td></tr>
+      <tr><td>槳轂</td><td>圓柱，直徑 14 mm、高 9 mm、軸孔 5 mm</td><td>假設，不是 UIUC 數據<span class="tag">AI possible</span></td></tr>
+      <tr><td>槳根</td><td>從 r/R 0.10 開始（埋進槳轂），截面和 r/R 0.15 相同</td><td>假設<span class="tag">AI likely</span></td></tr>
+      <tr><td>槳尖</td><td>在 r/R 0.99 平切收尾</td><td>實測弦長在 r/R 1.00 只剩 1.4 mm，太薄<span class="tag">AI likely</span></td></tr>
+      <tr><td>座標</td><td>+Z 是推力方向；從上往下看逆時針轉；前緣朝前進方向並抬高 β</td><td>建模慣例</td></tr>
+    </table></div>
+    <h3>檢查結果</h3>
+    <ul>
+      <li>單支槳葉長 56.52 mm，等於 0.99R − 0.10R；全槳直徑 125.7 mm，等於 2 × 0.99R。<span class="tag">OBS cad run 2026-11-26</span></li>
+      <li>體積 2,251 mm³，跟手算約 2,250 mm³ 一致（12% 翼型截面積約 0.082c²）。<span class="tag">OBS cad model inspect</span><span class="tag">AI likely（手算）</span></li>
+      <li><b>列印檢查沒過</b>：FDM 和 SLA 都是 FAILED。<span class="tag">OBS cad model dfm 2026-11-26</span>
+        <ul>
+          <li>翼型尾緣只有 0.12 mm 厚，FDM（0.4 mm 噴嘴）至少要 0.8 mm。</li>
+          <li>葉尖和尾緣是刀刃狀，會印成圓角。</li>
+          <li>平放時有 39% 的表面朝下傾斜不到 45°，需要支撐材。</li>
+        </ul>
+      </li>
+      <li>這些是真實翼型本來就有的特性，模型先不改。真的要印時，要把尾緣加厚到約 0.8 mm，這會改變翼型，模擬也要跟著改。<span class="tag">OPEN：建議給列印組員用 SLA 樹脂，或做「尾緣加厚版」再重算一次</span></li>
+      <li>網頁顯示的模型是網格化的版本，誤差在 0.02 mm 以內；STEP 檔是精確的 CAD 曲面。<span class="tag">OBS cad model export --tolerance 0.02 --angle 5</span></li>
+    </ul>
+  </details>
+
+  <h2>一步一步：做了什麼</h2>
+
+  <details>
+    <summary>步驟 1　目標與成功標準<span class="tag">AGREED 2026-11-25</span></summary>
+    <div class="tbl"><table>
+      <tr><th>問題</th><th>決定</th></tr>
+      <tr><td>我做的 prototype 是什麼</td><td>參數化設計＋模擬 pipeline：輸入瘤突和鋸齒的參數，輸出 3D 模型（STL/STEP）和推力、效率的預測；組員印出來實測，對答案</td></tr>
+      <tr><td>怎樣算成功</td><td>同推力下噪音降 2 dB 以上，推力損失小於 5%（文獻約降 3–4 dB）</td></tr>
+      <tr><td>跟什麼比</td><td>UIUC 螺旋槳資料庫裡有實測數據的小槳（後來選了 DA4002，見步驟 3）</td></tr>
+      <tr><td>六個構想怎麼放</td><td>貓頭鷹（鋸齒）和大翅鯨（瘤突）是模擬主角；鯊魚皮只放文獻和表面處理概念；翠鳥喙只放在槳轂整流罩的外形概念</td></tr>
+      <tr><td>噪音怎麼判斷</td><td>模擬只負責推力和效率；噪音以組員實測為準，報告裡會講清楚</td></tr>
+      <tr><td>期末報告</td><td>2026-12-16（三）</td></tr>
+    </table></div>
+  </details>
+
+  <details>
+    <summary>步驟 2　為什麼需要：外送無人機最大的阻力是噪音<span class="tag">REF</span></summary>
+    <ul>
+      <li>愛爾蘭 Dublin：議會一年內收到 25 件外送無人機投訴，其中 18 件主要是噪音，居民形容像拖拉機或割草機。<a href="https://www.irishtimes.com/ireland/dublin/2025/06/02/like-living-near-a-helicopter-residents-fed-up-at-takeaway-delivery-drones-buzzing-over-their-homes">Irish Times 2025</a><span class="tag">REF</span></li>
+      <li>美國德州：Amazon 送貨無人機的路線附近，居民抱怨噪音。<a href="https://www.nbcnews.com/tech/tech-news/amazon-drone-delivery-faces-latest-challenge-texas-annoyed-residents-rcna166942">NBC</a>、<a href="https://spectrumnews1.com/tx/houston/news/2026/06/23/richardson-residents-raise-concerns-over-noise-from-amazon-drone-deliveries">Spectrum News 2026</a><span class="tag">REF</span></li>
+      <li>NASA 2017 聽測實驗（38 人）：在同樣音量下，無人機的聲音比任何地面車輛都更惹人厭。<a href="https://ntrs.nasa.gov/citations/20170005870">NTRS</a><span class="tag">REF</span></li>
+      <li>歐盟法規：900 g 以下（C1 級）的無人機有聲功率上限，分三階段收緊：85 → 83 → 81 dB(A)。<a href="https://www.easa.europa.eu/en/domains/environment/drones-and-vertical-take-and-landing-capable-aircraft-vca">EASA</a><span class="tag">REF，只讀了摘要，沒讀法規原文</span></li>
+      <li>串起來：法規每一階段收緊 2 dB，剛好就是我們的降噪目標。<span class="tag">AI likely</span></li>
+    </ul>
+    <p><small>以上只讀了搜尋摘要，沒有讀全文；新聞屬於個案，不是系統性調查。</small></p>
+  </details>
+
+  <details data-charts="geom">
+    <summary>步驟 3　選基準槳：UIUC 的 DA4002 5×3.75<span class="tag">REF</span><span class="tag">AI likely</span></summary>
+    <p>要判斷仿生特徵有沒有用，先要有一支「沒加仿生」的槳，而且模擬要能對上它的實測數據。</p>
+    <ul>
+      <li>DA4002 是 UIUC 自己設計、<b>用 3D 列印做的</b>5 吋雙葉槳：矩形槳葉（設計 c/R = 0.18）、整支用 SDA1075 翼型、螺距比 0.75（75% 半徑處 17.7°）。<a href="https://m-selig.ae.illinois.edu/pubs/DetersAnandaSelig-2014-AIAA-2014-2151.pdf">AIAA 2014-2151</a><span class="tag">REF</span></li>
+      <li>實測數據：靜止推力（1,410–7,440 RPM，13 點）和風洞（4,031、5,039、6,045 RPM，各 11–13 個前進比）。<a href="https://m-selig.ae.illinois.edu/props/volume-2/propDB-volume-2.html">UIUC Propeller Database Vol. 2</a><span class="tag">REF</span></li>
+      <li>選它的理由：幾何和翼型全部公開（市售槳的翼型通常不公開）、尺寸等於小型空拍機、有實測數據，而且跟組員之後用 3D 列印實測的條件一樣。<span class="tag">AI likely</span></li>
+    </ul>
+    <div class="charts">
+      <div class="chart" id="c-chord"></div>
+      <div class="chart" id="c-beta"></div>
+      <div class="chart" id="c-foil"></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>步驟 4　模擬方法：BEMT 葉素動量理論（假設和參數全列）<span class="tag">AI likely</span></summary>
+    <h3>做法</h3>
+    <ol>
+      <li>把槳葉從 r/R 0.15 到 0.995 切成 40 小段，越靠近葉尖切得越細。</li>
+      <li>每一段當成 2D 翼型，查它在當地攻角 α 和雷諾數 Re 下的升力係數 Cl、阻力係數 Cd。</li>
+      <li>同時要求「這一段產生的推力和扭矩」等於「流過這一圈的空氣動量變化」，解出每一段的入流角 φ。</li>
+      <li>把 40 段的推力、扭矩加起來，換成無因次的 CT、CP 和效率 η，跟 UIUC 實測比。</li>
+    </ol>
+    <h3>方程式</h3>
+    <p>每一段只有一個未知數：入流角 φ。由軸向和切向動量守恆，加上 Prandtl 葉尖與輪轂損失 F：</p>
+    <div class="eq">σ′ = B·c / (2πr)　　Cn = Cl·cosφ − Cd·sinφ　　Ct = Cl·sinφ + Cd·cosφ</div>
+    <div class="eq">k = σ′·Cn / (4F·sinφ)　　k′ = σ′·Ct / (4F·sinφ)</div>
+    <div class="eq">殘差　R(φ) = Ωr / (cosφ + k′) · (sinφ − k) − V = 0</div>
+    <p>在 0 到 90° 之間找 R(φ) 第一次變號的地方，再用 Brent 法收斂到 10⁻¹⁰。這個寫法在 V = 0（靜止推力、無人機懸停）時也不會發散；常見的 a、a′ 寫法在 V = 0 時會除以零。<span class="tag">AI likely</span></p>
+    <div class="eq">CT = T / (ρ n² D⁴)　　CP = P / (ρ n³ D⁵)　　J = V / (nD)　　η = J·CT / CP</div>
+    <h3>參數</h3>
+    <div class="tbl"><table>
+      <tr><th>參數</th><th>數值</th><th>理由</th></tr>
+      <tr><td>空氣密度 ρ</td><td>1.225 kg/m³</td><td>標準大氣海平面<span class="tag">AI likely</span></td></tr>
+      <tr><td>運動黏度 ν</td><td>1.48 × 10⁻⁵ m²/s</td><td>約 15 °C 空氣<span class="tag">AI likely</span></td></tr>
+      <tr><td>分段數</td><td>40，r/R 0.15–0.995，正弦間距（葉尖較密）</td><td>葉尖損失變化最快；在 r/R = 1 時 F = 0，所以不算到最末端</td></tr>
+      <tr><td>輪轂損失起點</td><td>r/R 0.10</td><td>假設<span class="tag">AI possible</span></td></tr>
+      <tr><td>翼型數據</td><td>NeuralFoil 0.3.3（large 模型）</td><td>用 XFOIL 資料訓練的神經網路，Windows 不用編譯，一次可算整張表<span class="tag">REF</span> <a href="https://github.com/peterdsharpe/NeuralFoil">GitHub</a></td></tr>
+      <tr><td>查表範圍</td><td>α −15° 到 25°（每 0.5°）× Re 3,000 到 200,000（16 點，對數間距）</td><td>涵蓋槳根到葉尖；查表時線性內插</td></tr>
+      <tr><td>轉捩參數 n_crit</td><td>試了 0.5、1、3、5、9，<b>採用 3</b></td><td>見步驟 5、6</td></tr>
+    </table></div>
+    <h3>簡化（會造成誤差的地方）</h3>
+    <ul>
+      <li>查翼型數據時，Re 用沒有誘導速度的 W₀ = √(V² + (Ωr)²) 計算。<span class="tag">AI likely：誤差幾 %</span></li>
+      <li>沒有旋轉造成的「失速延遲」修正：槳根的實際升力通常比 2D 數據高。<span class="tag">AI likely</span></li>
+      <li>槳葉不變形、氣流穩定、沒有馬達和機架的干擾。</li>
+      <li>2D 翼型數據本身在 Re 1–3 萬這種低雷諾數很不準（見步驟 5）。</li>
+    </ul>
+    <p>程式碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/bemt.py"><code>sim/bemt.py</code></a>、<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/validate_da4002.py"><code>sim/validate_da4002.py</code></a>。重跑：</p>
+    <pre>uv run python sim/fetch_uiuc.py
+uv run python sim/validate_da4002.py --ncrit 3
+uv run python sim/export_site_data.py</pre>
+  </details>
+
+  <details data-charts="polar">
+    <summary>步驟 5　第一次跑：推力少了一半。原因是低雷諾數的翼型數據<span class="tag">SIM 2026-11-26</span></summary>
+    <ul>
+      <li>用 XFOIL 的預設值 n_crit = 9（代表非常安靜的風洞）：風洞推力少了 49–53%，靜止推力少了 37%。<span class="tag">SIM validate_da4002.py --ncrit 9</span></li>
+      <li>原因：這支槳在 5,000 RPM 時，大部分截面的 Re 只有 0.3–2.2 萬。n_crit = 9 時，翼型上表面被算成大面積層流分離，升力掉很多、阻力變大。例如 Re = 2 萬、α = 4° 時，Cl 只有 0.21（n_crit = 3 時是 0.59）。<span class="tag">SIM NeuralFoil large</span></li>
+      <li>真實的槳在旋轉、來流有擾動，3D 列印表面又粗糙，層流會比較早轉成紊流，等於 n_crit 比較低。<span class="tag">AI likely</span></li>
+    </ul>
+    <div class="charts">
+      <div class="chart" id="c-cl"></div>
+      <div class="chart" id="c-cd"></div>
+    </div>
+  </details>
+
+  <details data-charts="ncrit">
+    <summary>步驟 6　調整 n_crit：選 3，風洞推力誤差降到 5–7%<span class="tag">SIM 2026-11-26</span></summary>
+    <p>只改 n_crit，其他都不動，跑五次，看平均誤差（模擬 − 實測）／實測。風洞只算 CT &gt; 0.03 的點，因為 CT 接近 0 時相對誤差沒有意義。</p>
+    <div class="charts">
+      <div class="chart" id="c-ncrit-ct"></div>
+      <div class="chart" id="c-ncrit-cp"></div>
+    </div>
+    <div class="tbl" id="t-ncrit"></div>
+    <ul>
+      <li>n_crit = 3 時推力最接近；再調低，推力誤差反而變大，功率誤差也一直在 −14% 以下，所以這不是靠調 n_crit 就能解決的問題。<span class="tag">SIM</span></li>
+      <li>選 3 是「挑誤差最小的那一個」，屬於校正，不是從物理推出來的值。<span class="tag">AI likely</span></li>
+    </ul>
+  </details>
+
+  <details data-charts="results">
+    <summary>步驟 7　結果（n_crit = 3）：推力趨勢對了，功率一律偏低<span class="tag">SIM 2026-11-26</span></summary>
+    <p>點是 UIUC 實測，線是 BEMT 模擬。同一個顏色是同一個轉速。</p>
+    <div class="charts">
+      <div class="chart" id="c-st-ct"></div>
+      <div class="chart" id="c-st-cp"></div>
+      <div class="chart" id="c-j-ct"></div>
+      <div class="chart" id="c-j-cp"></div>
+      <div class="chart" id="c-j-eta"></div>
+    </div>
+    <h3>沿著槳葉看（5,000 RPM、靜止）</h3>
+    <div class="charts">
+      <div class="chart" id="c-sp-a"></div>
+      <div class="chart" id="c-sp-re"></div>
+    </div>
+    <ul>
+      <li>風洞：CT 平均誤差 −4.8%（4,031 RPM）、−6.2%（5,039）、−6.9%（6,045）；CP 平均誤差 −14.3%、−15.9%、−16.1%。<span class="tag">SIM</span></li>
+      <li>靜止：CT −13.5%，CP −27.8%。實測 CT 幾乎不隨轉速改變（0.12–0.13），模擬則從 0.093 升到 0.120。<span class="tag">SIM</span><span class="tag">REF 實測</span></li>
+      <li>最高效率：實測 0.55 / 0.59 / 0.63，模擬 0.61 / 0.65 / 0.67。因為功率被低估，效率被高估。<span class="tag">SIM</span></li>
+      <li>槳根（r/R &lt; 0.35）的攻角在 22–30°（最大 29.8°，在 r/R 0.22），已經失速；這一段的數據最不可信。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li>5,000 RPM 靜止時，模擬推力 0.247 N（約 25 gf）。<span class="tag">SIM</span></li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>步驟 8　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <ul>
+      <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異。兩者用同一套方法，系統性誤差大致會互相抵消。<span class="tag">AI possible</span></li>
+      <li><b>不能拿來做什麼：</b>直接報告推力和功率的絕對數字，或用它預測噪音。<span class="tag">AI likely</span></li>
+      <li><b>功率偏低的可能原因：</b>NeuralFoil 在低 Re 的阻力偏低、沒算 3D 列印的粗糙度、沒算槳轂阻力。CP 在每個前進比都少約 0.015，很像是固定少了一塊阻力。<span class="tag">AI likely</span></li>
+      <li><b>靜止推力的趨勢不對：</b>模擬的低雷諾數效應太強，加上槳根失速但沒有旋轉失速延遲修正。<span class="tag">AI possible</span></li>
+    </ul>
+    <h3>下一步</h3>
+    <ol>
+      <li>校正：在 Cd 上加一個固定值（約 +0.01 到 +0.02），讓 CP 對上實測。只加一個參數，避免過度擬合。<span class="tag">OPEN，建議先做這個</span></li>
+      <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據）。<span class="tag">OPEN</span></li>
+      <li>用同一套 CAD 程式做出仿生槳的 3D 模型，交給組員列印。<span class="tag">OPEN</span></li>
+    </ol>
+  </details>
+
+  <h2>背景資料</h2>
+  <details>
+    <summary>六個構想怎麼放到旋翼上</summary>
+    <div class="flow">
+      <div class="panel"><b>前緣：大翅鯨胸鰭</b><small>瘤狀突起，延遲失速</small></div>
+      <div class="panel"><b>前緣＋尾緣：貓頭鷹羽毛</b><small>梳齒與鋸齒，降低寬頻噪音</small></div>
+      <div class="panel"><b>表面：鯊魚皮</b><small>順流微溝槽，降低摩擦、減少沾灰（溝槽也可做抗菌）</small></div>
+      <div class="panel"><b>機身或導流罩：翠鳥喙</b><small>截面平滑放大，減少壓力突變</small></div>
+    </div>
+  </details>
+  <details>
+    <summary>前人做過什麼：貓頭鷹鋸齒槳已有很多研究；鯨魚瘤突用在小槳上，結果好壞參半；鯊魚溝槽只有用在機翼上的研究；三種合在一起的旋翼還沒找到</summary>
     <div class="tbl"><table>
       <tr><th>構想</th><th>研究</th><th>結果</th></tr>
       <tr><td>貓頭鷹前緣＋尾緣鋸齒</td><td><a href="https://www.ebsco.com/articles/chemistry/a2779745-54b9-5e5a-a4fc-1d678df0ef2d/experimental-investigation-of-a-biomimetic-propeller-coupled-with-owl-inspired-leading-and-trailing-edges-serrations">Physics of Fluids 2025</a></td><td>聲功率最多降低 3.1 dB，推力效率提高 7.9%<span class="tag">REF</span></td></tr>
@@ -51,10 +324,8 @@ th{color:var(--muted);font-weight:500}
     </table></div>
     <p><small>以上只讀了論文摘要，沒有讀全文。</small></p>
   </details>
-
-  <h2>流體模擬怎麼做</h2>
   <details>
-    <summary>結論：先用 BEMT 快速篩選設計，再用 RANS 比較推力；噪音要準，需要 LES 或 LBM，學生電腦跑不動</summary>
+    <summary>流體模擬方法比較：先用 BEMT 快速篩選，再用 RANS 比較推力；噪音要準需要 LES 或 LBM</summary>
     <div class="tbl"><table>
       <tr><th>方法</th><th>做法</th><th>速度</th><th>看得到鋸齒、瘤突嗎</th></tr>
       <tr><td>BEMT 葉素動量理論</td><td>把葉片切成很多小段，每段查 2D 翼型資料，再和動量守恆一起迭代求解</td><td>幾秒</td><td>只能間接放進去</td></tr>
@@ -69,14 +340,312 @@ th{color:var(--muted);font-weight:500}
   <details>
     <summary>模擬和現實的差距</summary>
     <ul>
-      <li>無人機槳屬於低雷諾數，流動會從層流轉成紊流，翼型資料和 RANS 在這裡誤差都很大。<span class="tag">AI likely</span></li>
+      <li>無人機槳屬於低雷諾數，流動會從層流轉成紊流，翼型資料和 RANS 在這裡誤差都很大（步驟 5 就遇到了）。<span class="tag">AI likely</span></li>
       <li>3D 列印的層紋本身就是一種粗糙度，可能把鯊魚溝槽的效果蓋過去。<span class="tag">AI likely</span></li>
       <li>真正飛行時的噪音，各種模擬方法都低估了（<a href="https://elib.dlr.de/222879/1/ELIB-Eintrag-2026-DomogallaV-222879-PaperPublished.pdf">DLR 2026</a>）。<span class="tag">REF</span></li>
       <li>模擬通常只算槳本身；實際量測還會混進馬達和機架的聲音，以及房間的反射音。<span class="tag">AI likely</span></li>
     </ul>
   </details>
 
-  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan</footer>
+  <p><small>標籤說明：REF 有出處的事實；OBS 實際觀察或量測；SIM 模擬結果（不是量測）；AI 推論（likely 很可能、possible 可能）；AGREED 已確認的決定；OPEN 還沒決定。實測數據來自 <a href="https://m-selig.ae.illinois.edu/props/propDB.html">UIUC Propeller Data Site</a>。原始碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026">GitHub</a>。</small></p>
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-26</footer>
 </main>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const box = document.getElementById('viewer');
+const loadMsg = document.getElementById('vload');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+box.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8a80, 1.2));
+const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+sun.position.set(1, 2, 1.5);
+scene.add(sun);
+const camera = new THREE.PerspectiveCamera(35, 1, 0.0002, 20);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.autoRotateSpeed = 1.5;
+
+let home = null;
+let meshes = [];
+let needsRender = true;
+controls.addEventListener('change', () => { needsRender = true; });
+
+function resize() {
+  const w = box.clientWidth, h = box.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  needsRender = true;
+}
+new ResizeObserver(resize).observe(box);
+
+new GLTFLoader().load('models/da4002_5x3.75.glb', (gltf) => {
+  const root = gltf.scene;
+  scene.add(root);
+  root.traverse((o) => { if (o.isMesh) { meshes.push(o); o.material.side = THREE.DoubleSide; } });
+  const b = new THREE.Box3().setFromObject(root);
+  const size = b.getSize(new THREE.Vector3());
+  const center = b.getCenter(new THREE.Vector3());
+  const r = size.length() / 2;
+  controls.target.copy(center);
+  controls.minDistance = r * 0.03;   // close enough to see the trailing edge
+  controls.maxDistance = r * 8;
+  resize();
+  // distance that fits the bounding sphere in the narrower of the two fields of view (phones are tall)
+  const vfov = THREE.MathUtils.degToRad(camera.fov);
+  const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
+  const dist = r / Math.sin(Math.min(vfov, hfov) / 2) * 1.05;
+  camera.position.copy(center).add(new THREE.Vector3(0.9, 0.75, 1.1).normalize().multiplyScalar(dist));
+  home = { pos: camera.position.clone(), target: controls.target.clone() };
+  controls.update();
+  loadMsg.remove();
+  needsRender = true;
+}, (e) => {
+  if (e.total) loadMsg.textContent = `載入模型中…${Math.round(e.loaded / e.total * 100)}%`;
+}, () => { loadMsg.textContent = '模型載入失敗，請重新整理或下載 STEP 檔。'; });
+
+(function loop() {
+  requestAnimationFrame(loop);
+  const moved = controls.update();
+  if (moved || needsRender || controls.autoRotate) { renderer.render(scene, camera); needsRender = false; }
+})();
+
+const fsBtn = document.getElementById('vFull');
+function isFs() { return document.fullscreenElement === box || box.classList.contains('fs'); }
+function fsLabel() { fsBtn.textContent = isFs() ? '離開全螢幕' : '全螢幕'; resize(); }
+fsBtn.addEventListener('click', () => {
+  if (isFs()) {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    box.classList.remove('fs');
+    fsLabel();
+    return;
+  }
+  // Real fullscreen where allowed; where it is refused or ignored (iPhone, embedded views), fill the window instead.
+  if (box.requestFullscreen) box.requestFullscreen().catch(() => {});
+  setTimeout(() => { if (document.fullscreenElement !== box) box.classList.add('fs'); fsLabel(); }, 400);
+});
+document.addEventListener('fullscreenchange', () => { fsBtn.textContent = isFs() ? '離開全螢幕' : '全螢幕'; resize(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && box.classList.contains('fs')) { box.classList.remove('fs'); fsBtn.textContent = '全螢幕'; resize(); } });
+
+document.getElementById('vReset').addEventListener('click', () => {
+  if (!home) return;
+  camera.position.copy(home.pos); controls.target.copy(home.target); controls.update(); needsRender = true;
+});
+const spin = document.getElementById('vSpin');
+spin.addEventListener('click', () => {
+  controls.autoRotate = !controls.autoRotate; spin.setAttribute('aria-pressed', String(controls.autoRotate));
+});
+const wire = document.getElementById('vWire');
+wire.addEventListener('click', () => {
+  const on = wire.getAttribute('aria-pressed') !== 'true';
+  meshes.forEach((m) => { m.material.wireframe = on; });
+  wire.setAttribute('aria-pressed', String(on)); needsRender = true;
+});
+</script>
+
+<script>
+(function () {
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const fmt = (v, d) => (v == null || Number.isNaN(v)) ? '—' : (Math.abs(v) >= 1000 ? Math.round(v).toLocaleString('en-US') : Number(v.toFixed(d)).toString());
+
+  function niceTicks(lo, hi, n) {
+    const span = hi - lo || 1; const step0 = span / n; const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => span / s <= n) || 10 * mag;
+    const t = []; for (let v = Math.ceil(lo / step) * step; v <= hi + step * 1e-9; v += step) t.push(+v.toFixed(10));
+    return t;
+  }
+
+  // series: {name, color (css var), kind: 'line'|'dots', x:[], y:[]}
+  function lineChart(host, cfg) {
+    host.textContent = '';
+    const h4 = document.createElement('h4'); h4.textContent = cfg.title; host.appendChild(h4);
+    if (cfg.sub) { const p = document.createElement('p'); p.className = 'sub'; p.textContent = cfg.sub; host.appendChild(p); }
+    if (cfg.series.length > 1) {
+      const lg = document.createElement('div'); lg.className = 'legend';
+      cfg.series.forEach((s) => {
+        const it = document.createElement('span');
+        const sw = el('svg', { width: 18, height: 10 }); sw.style.width = '18px';
+        if (s.kind === 'dots') el('circle', { cx: 9, cy: 5, r: 4, fill: css(s.color) }, sw);
+        else el('line', { x1: 1, y1: 5, x2: 17, y2: 5, stroke: css(s.color), 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-dasharray': s.dash || '' }, sw);
+        it.appendChild(sw); it.appendChild(document.createTextNode(s.name)); lg.appendChild(it);
+      });
+      host.appendChild(lg);
+    }
+    const W = Math.max(host.clientWidth - 24, 260), H = cfg.height || 230;
+    const m = { l: 46, r: 12, t: 8, b: 36 };
+    const xs = cfg.series.flatMap((s) => s.x), ys = cfg.series.flatMap((s) => s.y).filter((v) => v != null && !Number.isNaN(v));
+    let [x0, x1] = cfg.xDomain || [Math.min(...xs), Math.max(...xs)];
+    let [y0, y1] = cfg.yDomain || [Math.min(...ys), Math.max(...ys)];
+    if (!cfg.yDomain) { const pad = (y1 - y0) * 0.08 || 0.01; y0 -= pad; y1 += pad; if (cfg.yZero) y0 = Math.min(0, y0); }
+    const xt = niceTicks(x0, x1, Math.max(3, Math.floor(W / 80))), yt = niceTicks(y0, y1, 5);
+    if (!cfg.xDomain) { x0 = Math.min(x0, xt[0]); x1 = Math.max(x1, xt[xt.length - 1]); }
+    y0 = Math.min(y0, yt[0]); y1 = Math.max(y1, yt[yt.length - 1]);
+    const X = (v) => m.l + (v - x0) / (x1 - x0) * (W - m.l - m.r);
+    const Y = (v) => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, height: H, tabindex: 0, role: 'img', 'aria-label': cfg.title });
+    host.appendChild(svg);
+    yt.forEach((v) => { el('line', { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: css('--grid'), 'stroke-width': 1 }, svg); el('text', { x: m.l - 6, y: Y(v) + 3, 'text-anchor': 'end', class: 'tick' }, svg).textContent = fmt(v, 4); });
+    xt.forEach((v) => { el('text', { x: X(v), y: H - m.b + 14, 'text-anchor': 'middle', class: 'tick' }, svg).textContent = fmt(v, 3); });
+    if (y0 < 0 && y1 > 0) el('line', { x1: m.l, x2: W - m.r, y1: Y(0), y2: Y(0), stroke: css('--axis'), 'stroke-width': 1 }, svg);
+    el('line', { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: css('--axis'), 'stroke-width': 1 }, svg);
+    el('text', { x: (m.l + W - m.r) / 2, y: H - 4, 'text-anchor': 'middle', class: 'axlab' }, svg).textContent = cfg.xLabel;
+    const yl = el('text', { x: 12, y: (m.t + H - m.b) / 2, 'text-anchor': 'middle', class: 'axlab', transform: `rotate(-90 12 ${(m.t + H - m.b) / 2})` }, svg); yl.textContent = cfg.yLabel;
+    const cid = 'clip-' + host.id;
+    const cp = el('clipPath', { id: cid }, el('defs', {}, svg));
+    el('rect', { x: m.l - 6, y: m.t - 6, width: W - m.l - m.r + 12, height: H - m.t - m.b + 12 }, cp);
+    const plot = el('g', { 'clip-path': `url(#${cid})` }, svg);
+    cfg.series.filter((s) => s.kind !== 'dots').forEach((s) => {
+      let d = ''; let pen = false;
+      s.x.forEach((x, i) => { const y = s.y[i]; if (y == null || Number.isNaN(y)) { pen = false; return; } d += (pen ? 'L' : 'M') + X(x).toFixed(1) + ',' + Y(y).toFixed(1); pen = true; });
+      el('path', { d, fill: 'none', stroke: css(s.color), 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'stroke-dasharray': s.dash || '' }, plot);
+    });
+    cfg.series.filter((s) => s.kind === 'dots').forEach((s) => {
+      s.x.forEach((x, i) => { const y = s.y[i]; if (y == null) return; el('circle', { cx: X(x), cy: Y(y), r: 4, fill: css(s.color), stroke: css('--surface'), 'stroke-width': 2 }, plot); });
+    });
+    // hover: crosshair snapping to the nearest x, one tooltip with every series
+    const allX = [...new Set(xs.map((v) => +v.toFixed(6)))].sort((a, b) => a - b);
+    const cross = el('line', { y1: m.t, y2: H - m.b, stroke: css('--axis'), 'stroke-width': 1, visibility: 'hidden' }, svg);
+    const tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
+    let idx = -1;
+    function show(i) {
+      idx = Math.max(0, Math.min(allX.length - 1, i)); const xv = allX[idx]; const px = X(xv);
+      cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.setAttribute('visibility', 'visible');
+      tip.textContent = '';
+      const hd = document.createElement('div'); hd.className = 'x'; hd.textContent = `${cfg.xLabel} = ${fmt(xv, 4)}`; tip.appendChild(hd);
+      const tol = (x1 - x0) * 0.012;
+      cfg.series.forEach((s) => {
+        let best = -1, bd = Infinity; s.x.forEach((x, k) => { const d = Math.abs(x - xv); if (d < bd) { bd = d; best = k; } });
+        if (best < 0 || bd > tol || s.y[best] == null) return;
+        const row = document.createElement('div'); row.className = 'row';
+        const k = el('svg', { width: 12, height: 6 }); k.style.width = '12px'; el('line', { x1: 0, y1: 3, x2: 12, y2: 3, stroke: css(s.color), 'stroke-width': 2 }, k);
+        const b = document.createElement('b'); b.textContent = fmt(s.y[best], cfg.digits || 4);
+        const n = document.createElement('i'); n.textContent = s.name;
+        row.append(k, b, n); tip.appendChild(row);
+      });
+      tip.style.display = 'block';
+      const hostW = host.clientWidth; const left = (px / W) * (hostW - 24) + 12;
+      tip.style.left = Math.min(Math.max(left + 10, 4), hostW - tip.offsetWidth - 4) + 'px';
+      tip.style.top = (svg.getBoundingClientRect().top - host.getBoundingClientRect().top + 6) + 'px';
+    }
+    function hide() { cross.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }
+    svg.addEventListener('pointermove', (e) => {
+      const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width * W;
+      const xv = x0 + (px - m.l) / (W - m.l - m.r) * (x1 - x0);
+      let bi = 0; allX.forEach((v, i) => { if (Math.abs(v - xv) < Math.abs(allX[bi] - xv)) bi = i; }); show(bi);
+    });
+    svg.addEventListener('pointerleave', hide);
+    svg.addEventListener('focus', () => show(idx < 0 ? 0 : idx));
+    svg.addEventListener('blur', hide);
+    svg.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight') { show(idx + 1); e.preventDefault(); } if (e.key === 'ArrowLeft') { show(idx - 1); e.preventDefault(); } });
+    // table view
+    const det = document.createElement('details'); const sm = document.createElement('summary'); sm.textContent = '數據表'; det.appendChild(sm);
+    const wrap = document.createElement('div'); wrap.className = 'tbl'; const tb = document.createElement('table');
+    const hr = document.createElement('tr'); const th0 = document.createElement('th'); th0.textContent = cfg.xLabel; th0.className = 'num'; hr.appendChild(th0);
+    cfg.series.forEach((s) => { const th = document.createElement('th'); th.className = 'num'; th.textContent = s.name; hr.appendChild(th); }); tb.appendChild(hr);
+    allX.forEach((xv) => {
+      const tr = document.createElement('tr'); const td0 = document.createElement('td'); td0.className = 'num'; td0.textContent = fmt(xv, 4); tr.appendChild(td0);
+      cfg.series.forEach((s) => { const td = document.createElement('td'); td.className = 'num'; const k = s.x.findIndex((x) => Math.abs(x - xv) < 1e-6); td.textContent = k < 0 ? '' : fmt(s.y[k], cfg.digits || 4); tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    wrap.appendChild(tb); det.appendChild(wrap); host.appendChild(det);
+  }
+
+  function airfoil(host, d) {
+    host.textContent = '';
+    const h4 = document.createElement('h4'); h4.textContent = 'SDA1075 翼型（厚度 12%）'; host.appendChild(h4);
+    const p = document.createElement('p'); p.className = 'sub'; p.textContent = '橫軸 x/c、縱軸 y/c，等比例'; host.appendChild(p);
+    const W = Math.max(host.clientWidth - 24, 260), pad = 10, s = (W - 2 * pad), H = 0.2 * s + 2 * pad;
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img', 'aria-label': 'SDA1075 翼型外形' }); host.appendChild(svg);
+    const Y = (y) => pad + (0.1 - y) * s;
+    el('line', { x1: pad, x2: W - pad, y1: Y(0), y2: Y(0), stroke: css('--grid'), 'stroke-width': 1 }, svg);
+    const pts = d.x.map((x, i) => `${(pad + x * s).toFixed(1)},${Y(d.y[i]).toFixed(1)}`).join(' ');
+    el('polygon', { points: pts, fill: css('--s1'), 'fill-opacity': 0.1, stroke: css('--s1'), 'stroke-width': 2, 'stroke-linejoin': 'round' }, svg);
+  }
+
+  function table(host, rows, head) {
+    const t = document.createElement('table'); const hr = document.createElement('tr');
+    head.forEach((h, i) => { const th = document.createElement('th'); th.textContent = h; if (i) th.className = 'num'; hr.appendChild(th); }); t.appendChild(hr);
+    rows.forEach((r) => { const tr = document.createElement('tr'); r.forEach((c, i) => { const td = document.createElement('td'); td.textContent = c; if (i) td.className = 'num'; tr.appendChild(td); }); t.appendChild(tr); });
+    host.textContent = ''; host.appendChild(t);
+  }
+
+  let D = null;
+  const COL = ['--s1', '--s2', '--s3'];
+  const draw = {
+    geom() {
+      const g = D.geometry;
+      lineChart(document.getElementById('c-chord'), { title: '弦長 c/R', sub: 'UIUC 量測的實際列印件', xLabel: 'r/R', yLabel: 'c/R', series: [{ name: 'c/R', color: '--s1', kind: 'line', x: g.r_over_R, y: g.c_over_R }], yZero: true });
+      lineChart(document.getElementById('c-beta'), { title: '扭角 β（度）', sub: '槳根角度大、葉尖小', xLabel: 'r/R', yLabel: 'β (deg)', series: [{ name: 'β', color: '--s1', kind: 'line', x: g.r_over_R, y: g.beta_deg }], digits: 2 });
+      airfoil(document.getElementById('c-foil'), D.airfoil);
+    },
+    polar() {
+      const p = D.polars;
+      const ser = (key) => [{ name: 'n_crit 9（安靜風洞）', color: '--s2', kind: 'line', x: p['9'].alpha, y: p['9'][key] }, { name: 'n_crit 3（採用）', color: '--s1', kind: 'line', x: p['3'].alpha, y: p['3'][key] }];
+      lineChart(document.getElementById('c-cl'), { title: '升力係數 Cl', sub: 'SDA1075，Re = 20,000，NeuralFoil', xLabel: 'α (deg)', yLabel: 'Cl', series: ser('cl'), digits: 3 });
+      lineChart(document.getElementById('c-cd'), { title: '阻力係數 Cd', sub: 'SDA1075，Re = 20,000，NeuralFoil', xLabel: 'α (deg)', yLabel: 'Cd', series: ser('cd'), digits: 4, yZero: true });
+    },
+    ncrit() {
+      const ns = ['0.5', '1', '3', '5', '9']; const nx = ns.map(Number);
+      const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+      const st = ns.map((n) => D.runs[n].static);
+      const wt = ns.map((n) => D.runs[n].wind_tunnel);
+      const sCT = st.map((s) => s.CT_err_pct_mean), sCP = st.map((s) => s.CP_err_pct_mean);
+      const wCT = wt.map((w) => avg(w.map((r) => r['CT_err_pct_mean_CTgt0.03']))), wCP = wt.map((w) => avg(w.map((r) => r['CP_err_pct_mean_CTgt0.03'])));
+      lineChart(document.getElementById('c-ncrit-ct'), { title: '推力 CT 平均誤差（%）', sub: '0 代表完全吻合', xLabel: 'n_crit', yLabel: '誤差 %', series: [{ name: '靜止', color: '--s1', kind: 'line', x: nx, y: sCT }, { name: '風洞（三個轉速平均）', color: '--s2', kind: 'line', x: nx, y: wCT }], digits: 1, yDomain: [-60, 0] });
+      lineChart(document.getElementById('c-ncrit-cp'), { title: '功率 CP 平均誤差（%）', sub: '0 代表完全吻合', xLabel: 'n_crit', yLabel: '誤差 %', series: [{ name: '靜止', color: '--s1', kind: 'line', x: nx, y: sCP }, { name: '風洞（三個轉速平均）', color: '--s2', kind: 'line', x: nx, y: wCP }], digits: 1, yDomain: [-60, 0] });
+      const rows = ns.map((n, i) => [n, sCT[i].toFixed(1), sCP[i].toFixed(1), ...wt[i].map((r) => `${r['CT_err_pct_mean_CTgt0.03'].toFixed(1)} / ${r['CP_err_pct_mean_CTgt0.03'].toFixed(1)}`)]);
+      table(document.getElementById('t-ncrit'), rows, ['n_crit', '靜止 CT %', '靜止 CP %', '4031 RPM CT / CP %', '5039 RPM CT / CP %', '6045 RPM CT / CP %']);
+    },
+    results() {
+      const r = D.runs[String(D.chosen_ncrit)]; const st = r.static;
+      lineChart(document.getElementById('c-st-ct'), { title: '靜止推力係數 CT', sub: 'V = 0（懸停）', xLabel: 'RPM', yLabel: 'CT', series: [{ name: 'UIUC 實測', color: '--s1', kind: 'dots', x: st.rpm, y: st.CT_meas }, { name: 'BEMT', color: '--s1', kind: 'line', x: st.rpm, y: st.CT_sim }], yZero: true });
+      lineChart(document.getElementById('c-st-cp'), { title: '靜止功率係數 CP', sub: 'V = 0（懸停）', xLabel: 'RPM', yLabel: 'CP', series: [{ name: 'UIUC 實測', color: '--s1', kind: 'dots', x: st.rpm, y: st.CP_meas }, { name: 'BEMT', color: '--s1', kind: 'line', x: st.rpm, y: st.CP_sim }], yZero: true });
+      const wt = r.wind_tunnel;
+      const js = (key, title, yl, extra) => {
+        const series = [];
+        wt.forEach((w, i) => {
+          series.push({ name: `${Math.round(w.rpm)} 實測`, color: COL[i], kind: 'dots', x: w.J, y: w[key + '_meas'] });
+          series.push({ name: `${Math.round(w.rpm)} BEMT`, color: COL[i], kind: 'line', x: w.J, y: w[key + '_sim'] });
+        });
+        return Object.assign({ title, sub: '點：UIUC 實測；線：BEMT（RPM）', xLabel: 'J', yLabel: yl, series }, extra || {});
+      };
+      lineChart(document.getElementById('c-j-ct'), js('CT', '推力係數 CT vs 前進比 J', 'CT'));
+      lineChart(document.getElementById('c-j-cp'), js('CP', '功率係數 CP vs 前進比 J', 'CP', { yZero: true }));
+      lineChart(document.getElementById('c-j-eta'), js('eta', '效率 η vs 前進比 J', 'η', { yDomain: [0, 0.8], digits: 3 }));
+      const sp = D.spanwise;
+      lineChart(document.getElementById('c-sp-a'), { title: '各段攻角 α（度）', sub: '槳根超過 20°：已失速', xLabel: 'r/R', yLabel: 'α (deg)', series: [{ name: 'α', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.alpha_deg }], digits: 1, yZero: true });
+      lineChart(document.getElementById('c-sp-re'), { title: '各段雷諾數 Re', sub: '大部分不到 2.5 萬：低雷諾數', xLabel: 'r/R', yLabel: 'Re', series: [{ name: 'Re', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.re }], digits: 0, yZero: true });
+    },
+  };
+
+  const drawn = new Set();
+  function drawOpen() {
+    document.querySelectorAll('details[data-charts]').forEach((d) => { if (d.open && D) { draw[d.dataset.charts](); drawn.add(d.dataset.charts); } });
+  }
+  document.querySelectorAll('details[data-charts]').forEach((d) => d.addEventListener('toggle', drawOpen));
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawOpen, 150); });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawOpen);
+  fetch('data/results.json').then((r) => r.json()).then((d) => { D = d; drawOpen(); });
+})();
+</script>
 </body>
 </html>

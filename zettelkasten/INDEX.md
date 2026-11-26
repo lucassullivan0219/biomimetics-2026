@@ -18,6 +18,7 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | 期末報告日期、截止 | BIO-20261126-2258 |
 | 需求證據、噪音投訴、法規 | BIO-20261126-2301 |
 | BEMT 模擬、基準槳驗證、DA4002、n_crit | BIO-20261126-2302 |
+| 3D 模型、CAD、列印、建模 skill | BIO-20261126-2326, BIO-20261126-2325 |
 
 ## Cards
 
@@ -36,3 +37,5 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261126-2300 | 2026-11-26 | decision | valid | Simulation plan confirmed; BEMT runs on the lab desktop with NeuralFoil polars | hardware, simulation-plan, bemt, neuralfoil |
 | BIO-20261126-2301 | 2026-11-26 | research | valid | Demand evidence: delivery-drone noise complaints, NASA annoyance study, EU C1/C2 sound limits | demand, noise, regulation |
 | BIO-20261126-2302 | 2026-11-26 | result | valid | Baseline BEMT validation vs UIUC DA4002 5x3.75 — thrust ~5-7 % low in tunnel, power 14-28 % low; n_crit 3 adopted | bemt, validation, baseline, da4002 |
+| BIO-20261126-2325 | 2026-11-26 | decision | valid | Modeling skill search: aero skills make no 3D geometry, so text-to-cad's cad skill was used — skill not installed in repo (classifier), cad 0.11.17 via uv | cad, skill, text-to-cad |
+| BIO-20261126-2326 | 2026-11-26 | result | valid | 3D CAD model of the DA4002 5x3.75 baseline prop — dims and volume check out; FDM/SLA checks fail on the 0.12 mm trailing edge | cad, 3d-model, dfm, printing |
