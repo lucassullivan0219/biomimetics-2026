@@ -13,7 +13,9 @@ which stays regular at V = 0 (static thrust), unlike the a / a' form.
 
 Simplifications (see card BIO-20261126-2302 on the baseline validation):
 - Reynolds number for the polar uses W0 = sqrt(V^2 + (Omega r)^2), not the induced W.
-- No 3D rotational (stall delay) correction, no blade deflection, rigid steady flow.
+- Rotational stall delay is optional (Rotor.snel, Snel on Cl only, factor capped at 1 by default);
+  calibration drag offset via DragOffset (cards BIO-20261126-2351, BIO-20261127-0044).
+- No blade deflection, rigid steady flow.
 """
 from __future__ import annotations
 
@@ -126,9 +128,45 @@ class Rotor:
     beta_deg: np.ndarray
     polar: Callable[[float, float], tuple[float, float]] | list  # one polar, or one per station
     hub_r_over_R: float | None = None
+    snel: bool = False  # rotational stall delay on Cl (Snel, Houwink & Piers 1993, QBlade form)
+    snel_cap: float | None = 1.0  # upper limit on the Snel factor; None = as published (can exceed 1 when c/r is large)
 
     def polar_at(self, i: int):
         return self.polar[i] if isinstance(self.polar, list) else self.polar
+
+
+_A0_CACHE: dict = {}
+
+
+def alpha0_deg(polar, re: float) -> float:
+    """Zero-lift angle of attack of a polar at this Reynolds number (first upward Cl crossing in -12..8 deg)."""
+    key = (id(polar), round(float(np.log10(max(re, 1.0))), 2))
+    if key not in _A0_CACHE:
+        a = np.arange(-12.0, 8.01, 0.1)
+        cl = np.array([polar(x, re)[0] for x in a])
+        idx = np.where((cl[:-1] < 0) & (cl[1:] >= 0))[0]
+        if len(idx):
+            j = idx[0]
+            _A0_CACHE[key] = float(a[j] - cl[j] * (a[j + 1] - a[j]) / (cl[j + 1] - cl[j]))
+        else:
+            _A0_CACHE[key] = 0.0
+    return _A0_CACHE[key]
+
+
+def snel_cl(cl2d: float, alpha_deg: float, a0_deg: float, c_over_r: float, lam_fac: float,
+            cap: float | None) -> float:
+    """Snel stall delay as given in the QBlade docs:
+    Cl3D = Cl2D + 3.1 * lam^2/(1+lam^2) * g * (c/r)^2 * (dCl/dalpha * (alpha - alpha0) - Cl2D),
+    g = 1 for 0 < alpha < 30 deg, 0.5 (1 + cos(6 alpha - 180 deg)) for 30-60 deg, else 0.
+    dCl/dalpha = 2 pi per radian (thin-airfoil slope; an assumption, the docs do not define it)."""
+    if alpha_deg <= 0 or alpha_deg >= 60:
+        return cl2d
+    g = 1.0 if alpha_deg < 30 else 0.5 * (1 + np.cos(np.radians(6 * alpha_deg - 180)))
+    f = 3.1 * lam_fac * g * c_over_r**2
+    if cap is not None:
+        f = min(f, cap)
+    cl_inv = 2 * np.pi * np.radians(alpha_deg - a0_deg)
+    return cl2d + f * (cl_inv - cl2d)
 
 
 def _prandtl(B: int, r: float, R: float, r_hub: float, sphi: float) -> float:
@@ -150,11 +188,17 @@ def solve_element(rotor: Rotor, i: int, V: float, omega: float) -> dict:
     W0 = np.hypot(V, omega * r)
     re = W0 * c / NU
     polar = rotor.polar_at(i)
+    if rotor.snel:
+        a0 = alpha0_deg(polar, re)
+        lam_fac = (omega * r) ** 2 / ((omega * r) ** 2 + V**2) if omega * r > 0 else 0.0  # lam^2/(1+lam^2), lam = Omega r / V
 
     def parts(phi: float):
         sphi, cphi = np.sin(phi), np.cos(phi)
         F = _prandtl(B, r, R, r_hub, sphi)
-        cl, cd = polar(np.degrees(beta - phi), re)
+        a = np.degrees(beta - phi)
+        cl, cd = polar(a, re)
+        if rotor.snel:
+            cl = snel_cl(cl, a, a0, c / r, lam_fac, rotor.snel_cap)
         cn = cl * cphi - cd * sphi
         ct = cl * sphi + cd * cphi
         k = sigma * cn / (4 * F * sphi)

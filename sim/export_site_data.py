@@ -31,6 +31,11 @@ def main() -> None:
     cal_key = f"{CHOSEN:g}_dcd{CAL_DCD:g}"
     runs[cal_key] = json.loads((HERE / "out" / f"da4002_validation_ncrit{CHOSEN:g}_dcd{CAL_DCD:g}.json").read_text())
     sweep = json.loads((HERE / "out" / "dcd_sweep.json").read_text())
+    snel_key = f"{CHOSEN:g}_snel"
+    final_key = f"{CHOSEN:g}_dcd{CAL_DCD:g}_snel"
+    runs[snel_key] = json.loads((HERE / "out" / f"da4002_validation_ncrit{CHOSEN:g}_snel.json").read_text())
+    runs[final_key] = json.loads((HERE / "out" / f"da4002_validation_ncrit{CHOSEN:g}_dcd{CAL_DCD:g}_snel.json").read_text())
+    sweep_snel = json.loads((HERE / "out" / "dcd_sweep_snel.json").read_text())
 
     g = v.load_table(v.DATA / "da4002_5x3.75_geom.txt")
     coords = bemt.read_airfoil(HERE / "data" / "sda1075.dat")
@@ -46,12 +51,17 @@ def main() -> None:
     rotor = v.make_rotor(p3)
     s = bemt.solve(rotor, 0.0, 5000)
     els = s["elements"]
+    rotor_f = v.make_rotor(bemt.DragOffset(p3, CAL_DCD))
+    rotor_f.snel = True
+    s_f = bemt.solve(rotor_f, 0.0, 5000)
     span = {
         "rpm": 5000, "V": 0,
         "r_over_R": r4([e["r"] / v.R for e in els]),
         "alpha_deg": r4([e["alpha_deg"] for e in els]),
         "re": [round(e["re"]) for e in els],
         "cl": r4([e["cl"] for e in els]),
+        "cl_final": r4([e["cl"] for e in s_f["elements"]]),
+        "alpha_final": r4([e["alpha_deg"] for e in s_f["elements"]]),
         "dT_dr": r4([e["dT_dr"] for e in els]),
         "T_N": round(s["T"], 4), "CT": round(s["CT"], 5), "CP": round(s["CP"], 5),
     }
@@ -61,6 +71,9 @@ def main() -> None:
         "chosen_ncrit": CHOSEN,
         "calibrated_key": cal_key,
         "calibration": sweep,
+        "calibration_snel": sweep_snel,
+        "snel_key": snel_key,
+        "final_key": final_key,
         "polar_re": POLAR_RE,
         "geometry": {"r_over_R": r4(g[:, 0]), "c_over_R": r4(g[:, 1]), "beta_deg": r4(g[:, 2])},
         "airfoil": {"x": r4(coords[:, 0]), "y": r4(coords[:, 1])},

@@ -82,7 +82,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <h1>仿生靜音旋翼</h1>
   <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
 
-  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬已經跟大學風洞實測對過，也校正了阻力：功率誤差降到 ±2%，但推力仍低估 7–9%，懸停時誤差還有 15–18%。3D 模型做好了。下一步：補升力修正，或直接加入仿生特徵。<span class="tag">2026-11-26</span></p>
+  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬已經跟大學實測對過，也補了升力和阻力兩個修正：懸停推力誤差 −1.7%、風洞功率誤差 ±1%、風洞推力 −5% 到 −7%。3D 模型做好了。下一步：加入鯨魚瘤突和貓頭鷹鋸齒。<span class="tag">2026-11-27</span></p>
 
   <ol class="timeline">
     <li class="done"><span class="d">11/24</span>選方向：無人機仿生旋翼（不做電風扇、不做小船）<span class="tag">AGREED</span></li>
@@ -91,8 +91,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     <li class="done"><span class="d">11/26</span>寫 BEMT 模擬程式，跟 UIUC 實測對答案<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/26</span>基準槳 3D CAD 模型（下方可旋轉、放大、全螢幕）</li>
     <li class="done"><span class="d">11/26</span>阻力校正：功率對上實測（±2%），但推力偏低的問題浮出來（步驟 8）<span class="tag">SIM</span></li>
-    <li class="now"><span class="d">下一步</span>補升力：槳根的旋轉失速延遲，修正懸停推力<span class="tag">OPEN</span></li>
-    <li><span class="d">之後</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳</li>
+    <li class="done"><span class="d">11/27</span>升力修正（旋轉失速延遲）：懸停推力對上了，採用「升力＋阻力」模型（步驟 9）<span class="tag">SIM</span></li>
+    <li class="now"><span class="d">下一步</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳<span class="tag">OPEN</span></li>
     <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
     <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
   </ol>
@@ -317,20 +317,61 @@ uv run python sim/export_site_data.py</pre>
     </ul>
   </details>
 
-  <details>
-    <summary>步驟 9　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+  <details data-charts="snel">
+    <summary>步驟 9　升力修正（旋轉失速延遲）：懸停推力對上了；採用「升力＋阻力」兩個修正<span class="tag">SIM 2026-11-27</span></summary>
+    <h3>為什麼要補升力</h3>
     <ul>
-      <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異。兩者用同一套方法，系統性誤差大致會互相抵消。<span class="tag">AI possible</span></li>
-      <li><b>不能拿來做什麼：</b>直接報告推力和功率的絕對數字，或用它預測噪音。<span class="tag">AI likely</span></li>
-      <li><b>功率偏低：</b>已用一個固定阻力 ΔCd 校正（步驟 8），風洞功率誤差降到 ±2%。<span class="tag">SIM</span></li>
-      <li><b>推力偏低（7–9%）：</b>阻力校正後更明顯，表示升力也不夠。最可能的來源是槳根大攻角處：旋轉的槳葉會延後失速，2D 翼型數據沒算到。<span class="tag">AI likely</span></li>
-      <li><b>靜止推力的趨勢不對：</b>模擬的低雷諾數效應太強，加上槳根失速但沒有旋轉失速延遲修正。<span class="tag">AI possible</span></li>
+      <li>槳葉在轉，離心力和科氏力會把槳根附近已經分離的氣流「壓回去」，讓失速延後、升力比 2D 風洞數據高。這叫旋轉失速延遲（Himmelskamp 效應）。<span class="tag">REF</span> <a href="https://docs.qblade.org/src/theory/aerodynamics/secondary_effects/himmelskamp.html">QBlade 文件</a></li>
+      <li>UIUC 同一個實驗室測小槳時也發現：BEMT 在低前進比會低估性能，原因是失速後的行為；加上失速後修正之後，低前進比的預測變好。<span class="tag">REF，只讀了摘要</span> <a href="https://m-selig.web.engr.illinois.edu/pubs/UhligSelig-2008-AIAA-2008-407-PostStallProps.pdf">Uhlig &amp; Selig 2008</a></li>
+      <li>步驟 7 看到槳根攻角 22–30°（失速區），步驟 8 補完阻力之後推力還是偏低，兩者都指向這裡。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+    </ul>
+    <h3>公式（Snel 修正）</h3>
+    <div class="eq">Cl₃D = Cl₂D + f · [ 2π·(α − α₀) − Cl₂D ]</div>
+    <div class="eq">f = 3.1 · λ²/(1+λ²) · g · (c/r)²　　λ = Ωr / V（懸停時 V = 0，λ²/(1+λ²) = 1）</div>
+    <div class="eq">g = 1（0° &lt; α &lt; 30°）；g = ½[1 + cos(6α − 180°)]（30°–60°）；其他 g = 0</div>
+    <ul>
+      <li>來源：Snel, Houwink &amp; Piers 1993，公式取自 <a href="https://docs.qblade.org/src/theory/aerodynamics/secondary_effects/himmelskamp.html">QBlade 文件</a>；原始報告沒讀到。只修升力，不修阻力。<span class="tag">REF</span></li>
+      <li><b>沒有任何可以調的參數</b>，所以不會「拿實測去湊」。</li>
+    </ul>
+    <h3>我加的假設</h3>
+    <div class="tbl"><table>
+      <tr><th>項目</th><th>做法</th><th>理由</th></tr>
+      <tr><td>升力斜率 dCl/dα</td><td>2π（每弧度）</td><td>薄翼理論；QBlade 文件沒定義這個值<span class="tag">AI possible</span></td></tr>
+      <tr><td>零升力角 α₀</td><td>每個 Re 從 NeuralFoil 極曲線找 Cl = 0 的位置</td><td>SDA1075 有彎度，α₀ 是負的<span class="tag">AI likely</span></td></tr>
+      <tr><td>f 的上限</td><td>f ≤ 1（不讓 Cl 超過理想勢流升力）</td><td>這支槳 c/r 很大：槳根 c/r ≈ 0.84，算出 f ≈ 2.1，物理上不合理。有、沒有上限都跑過：靜止 CT 只差 0.06%，因為只影響最靠近槳轂的幾段<span class="tag">SIM</span></td></tr>
+      <tr><td>阻力 ΔCd</td><td>加了 Snel 之後重新擬合（同樣只用 5,039 RPM）：結果還是 0.0325</td><td>CP RMS 誤差 14.8% → 3.6%<span class="tag">SIM calibrate_dcd.py --snel</span></td></tr>
+    </table></div>
+    <h3>四個版本比較</h3>
+    <div class="tbl" id="t-snel"></div>
+    <div class="charts">
+      <div class="chart" id="c-snel-st"></div>
+      <div class="chart" id="c-snel-ct"></div>
+      <div class="chart" id="c-snel-eta"></div>
+      <div class="chart" id="c-snel-cl"></div>
+    </div>
+    <ul>
+      <li><b>懸停推力對上了：</b>靜止 CT 平均誤差 −13.5% → −1.7%（最終版）。<span class="tag">SIM</span></li>
+      <li><b>但平均值蓋掉了一個趨勢：</b>實測 CT 幾乎不隨轉速變；模擬在低轉速低估約 8%、高轉速高估約 4%。低雷諾數效應在模型裡還是太強。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>風洞：</b>CT −5% 到 −7%，CP −0.2% 到 +1.2%。低前進比的推力對上了，中段（J 0.4–0.7）推力還是偏低 5–8%，所以最高效率仍然低估 0.05–0.09。<span class="tag">SIM</span></li>
+      <li><b>靜止功率：</b>−27.8% → −12.5%，改善了但還沒對上。<span class="tag">SIM</span></li>
+      <li><b>槳根升力很高：</b>修正後槳根 Cl 到 2.0–2.5。Snel 公式原本是為細長的風機葉片推出來的，用在這種寬葉小槳上可能修正過頭；推力剛好對上，也可能是兩個誤差互相抵消。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
+      <li><b>採用：</b>「Snel + ΔCd 0.0325」作為目前的最終模型，四個指標裡它最接近實測。比較仿生槳時，還是會同時跑「原始」版本，確認結論不會因為修正而翻轉。<span class="tag">AI likely</span><span class="tag">OPEN，建議兩個都跑</span></li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>步驟 10　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <ul>
+      <li><b>目前的最終模型：</b>BEMT + NeuralFoil（n_crit 3）+ Snel 旋轉失速延遲 + ΔCd 0.0325。<span class="tag">SIM</span></li>
+      <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異；推力和功率的絕對值誤差大約在 ±7% 以內（懸停功率除外）。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
+      <li><b>不能拿來做什麼：</b>預測噪音；也不能把懸停功率（還低估 12.5%）或效率（低估 0.05–0.09）當絕對值報告。<span class="tag">AI likely</span></li>
+      <li><b>還沒解決：</b>(1) 中段前進比的推力偏低 5–8%；(2) 靜止 CT 隨轉速的趨勢不對，低雷諾數效應太強。兩者可能都來自 NeuralFoil 在 Re 1–3 萬的升力偏低，這需要真的低雷諾數風洞數據才能確認。<span class="tag">AI possible</span></li>
     </ul>
     <h3>下一步</h3>
     <ol>
-      <li>補升力：加上旋轉失速延遲修正（例如 Snel 公式，不需要擬合參數），主要影響懸停和低前進比。<span class="tag">OPEN，建議先做這個</span></li>
-      <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據）。<span class="tag">OPEN</span></li>
+      <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據），比較仿生槳和基準槳。<span class="tag">OPEN，建議下一步做這個</span></li>
       <li>用同一套 CAD 程式做出仿生槳的 3D 模型，交給組員列印。<span class="tag">OPEN</span></li>
+      <li>（可選）試 Corrigan–Schillings 失速延遲模型；有研究指出它對低雷諾數小槳比 Snel 準。<span class="tag">REF</span> <a href="https://www.cambridge.org/core/journals/aeronautical-journal/article/blade-element-momentum-theory-extended-to-model-low-reynolds-number-propeller-performance/39999793AAC5B525A94F63246E5C5533">Aeronautical Journal</a><span class="tag">OPEN</span></li>
     </ol>
   </details>
 
@@ -381,7 +422,7 @@ uv run python sim/export_site_data.py</pre>
   </details>
 
   <p><small>標籤說明：REF 有出處的事實；OBS 實際觀察或量測；SIM 模擬結果（不是量測）；AI 推論（likely 很可能、possible 可能）；AGREED 已確認的決定；OPEN 還沒決定。實測數據來自 <a href="https://m-selig.ae.illinois.edu/props/propDB.html">UIUC Propeller Data Site</a>。原始碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026">GitHub</a>。</small></p>
-  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-26（阻力校正）</footer>
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-27（升力修正）</footer>
 </main>
 
 <script type="importmap">
@@ -695,6 +736,41 @@ wire.addEventListener('click', () => {
     });
     r.push(['靜止（檢驗）', f1(before.static.CT_err_pct_mean), f1(after.static.CT_err_pct_mean), f1(before.static.CP_err_pct_mean), f1(after.static.CP_err_pct_mean), '—']);
     table(document.getElementById('t-cal'), r, ['數據', 'CT 誤差 % 校正前', 'CT 誤差 % 校正後', 'CP 誤差 % 校正前', 'CP 誤差 % 校正後', '最高 η 實測 / 前 / 後']);
+  };
+
+  draw.snel = function () {
+    const V = [
+      ['原始（n_crit 3）', D.runs[String(D.chosen_ncrit)]],
+      ['只補阻力 ΔCd', D.runs[D.calibrated_key]],
+      ['只補升力 Snel', D.runs[D.snel_key]],
+      ['升力＋阻力（採用）', D.runs[D.final_key]],
+    ];
+    const pick = (run, rpm) => run.wind_tunnel.find((w) => Math.round(w.rpm) === rpm);
+    const f1 = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    const rows = V.map(([name, r]) => [name,
+      f1(r.static.CT_err_pct_mean), f1(r.static.CP_err_pct_mean),
+      [4031, 5039, 6045].map((rpm) => f1(pick(r, rpm)['CT_err_pct_mean_CTgt0.03'])).join(' / '),
+      [4031, 5039, 6045].map((rpm) => f1(pick(r, rpm)['CP_err_pct_mean_CTgt0.03'])).join(' / '),
+      [4031, 5039, 6045].map((rpm) => pick(r, rpm).eta_max_sim.toFixed(2)).join(' / ')]);
+    const m = V[0][1];
+    rows.push(['UIUC 實測', '—', '—', '—', '—', [4031, 5039, 6045].map((rpm) => pick(m, rpm).eta_max_meas.toFixed(2)).join(' / ')]);
+    table(document.getElementById('t-snel'), rows, ['版本', '靜止 CT %', '靜止 CP %', '風洞 CT %（4031 / 5039 / 6045）', '風洞 CP %', '最高效率 η']);
+    const base = V[0][1], fin = V[3][1];
+    lineChart(document.getElementById('c-snel-st'), { title: '靜止推力 CT', sub: '懸停；平均對上了，但趨勢不同', xLabel: 'RPM', yLabel: 'CT', series: [
+      { name: 'UIUC 實測', color: '--s1', kind: 'dots', x: base.static.rpm, y: base.static.CT_meas },
+      { name: '原始', color: '--s2', kind: 'line', x: base.static.rpm, y: base.static.CT_sim },
+      { name: '升力＋阻力', color: '--s3', kind: 'line', x: fin.static.rpm, y: fin.static.CT_sim }], yZero: true });
+    const b5 = pick(base, 5039), f5 = pick(fin, 5039);
+    const j = (key, title, yl, extra) => Object.assign({ title, sub: '5,039 RPM 風洞', xLabel: 'J', yLabel: yl, series: [
+      { name: 'UIUC 實測', color: '--s1', kind: 'dots', x: b5.J, y: b5[key + '_meas'] },
+      { name: '原始', color: '--s2', kind: 'line', x: b5.J, y: b5[key + '_sim'] },
+      { name: '升力＋阻力', color: '--s3', kind: 'line', x: f5.J, y: f5[key + '_sim'] }] }, extra || {});
+    lineChart(document.getElementById('c-snel-ct'), j('CT', '推力 CT vs J', 'CT'));
+    lineChart(document.getElementById('c-snel-eta'), j('eta', '效率 η vs J', 'η', { yDomain: [0, 0.8], digits: 3 }));
+    const sp = D.spanwise;
+    lineChart(document.getElementById('c-snel-cl'), { title: '各段升力係數 Cl（5,000 RPM 靜止）', sub: '槳根的升力被 Snel 修正大幅提高', xLabel: 'r/R', yLabel: 'Cl', series: [
+      { name: '原始（2D 數據）', color: '--s2', kind: 'line', x: sp.r_over_R, y: sp.cl },
+      { name: '升力＋阻力', color: '--s3', kind: 'line', x: sp.r_over_R, y: sp.cl_final }], digits: 2, yZero: true });
   };
 
   const drawn = new Set();

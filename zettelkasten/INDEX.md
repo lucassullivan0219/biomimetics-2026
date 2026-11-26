@@ -17,7 +17,8 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | 規格、成功標準、基準槳、分工（grill） | BIO-20261125-0207 |
 | 期末報告日期、截止 | BIO-20261126-2258 |
 | 需求證據、噪音投訴、法規 | BIO-20261126-2301 |
-| BEMT 模擬、基準槳驗證、DA4002、n_crit、阻力校正 | BIO-20261126-2351, BIO-20261126-2302 |
+| BEMT 模擬、目前採用的模型、升力修正、Snel | BIO-20261127-0044 |
+| 基準槳驗證、DA4002、n_crit、阻力校正 | BIO-20261126-2351, BIO-20261126-2302 |
 | 3D 模型、CAD、列印、建模 skill | BIO-20261126-2326, BIO-20261126-2325 |
 
 ## Cards
@@ -40,3 +41,4 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261126-2325 | 2026-11-26 | decision | valid | Modeling skill search: aero skills make no 3D geometry, so text-to-cad's cad skill was used — skill not installed in repo (classifier), cad 0.11.17 via uv | cad, skill, text-to-cad |
 | BIO-20261126-2326 | 2026-11-26 | result | valid | 3D CAD model of the DA4002 5x3.75 baseline prop — dims and volume check out; FDM/SLA checks fail on the 0.12 mm trailing edge | cad, 3d-model, dfm, printing |
 | BIO-20261126-2351 | 2026-11-26 | result | valid | Drag calibration dCd = 0.0325 — tunnel power within 2 % on held-out RPMs, but thrust 7-9 % low, efficiency now under-predicted, hover not fixed | bemt, calibration, drag |
+| BIO-20261127-0044 | 2026-11-27 | result | valid | Snel stall delay plus dCd 0.0325 adopted — hover thrust -1.7 %, tunnel power within 1 %, mid-J thrust still 5-8 % low, static trend wrong | bemt, stall-delay, snel, calibration |
