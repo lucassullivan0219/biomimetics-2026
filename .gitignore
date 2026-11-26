@@ -3,3 +3,6 @@ node_modules/
 __pycache__/
 *.tmp
 .cache/
+.venv/
+sim/data/uiuc/
+sim/out/*.npz

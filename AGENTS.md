@@ -10,9 +10,9 @@ Explanations for humans are in `C:\Users\User\Desktop\dev\project-framework\guid
 - Name: biomimetics-2026
 - Goal: Merge the group's six biomimetic ideas into a bio-inspired drone rotor, back it with simulation, and present it at the course final.
 - Deliverable: Bio-inspired rotor design + simulation results + final presentation (printing handed to teammates)
-- Deadline: 2027-01-08 (tentative, OPEN: confirm the final presentation date)
+- Deadline: 2026-12-16 (Wed), course final presentation (AGREED 2026-11-26, BIO-20261126-2258)
 - Card ID: `BIO-YYYYMMDD-HHMM`, the Asia/Taipei time when you write the card (Linux: `TZ=Asia/Taipei date +%Y%m%d-%H%M`; PowerShell: `[TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date),'Taipei Standard Time').ToString('yyyyMMdd-HHmm')`). If that ID exists, use the next minute. Cards made before v0.2 keep their numbers.
-- Access level: `TLP:RED` (section 7).
+- Access level: `TLP:CLEAR`; the GitHub repo is public so teammates can read it (section 7, BIO-20261126-2259).
 - Hub tile: doc `map/biomimetics-2026` in the Claude Hub artifact https://claude.ai/artifact/XJW55vPwu1v4Q8piqSLrYY (framework PF-0034, PF-20261109-2026). Page: https://claude.ai/artifact/XJW55vPwu1v4Q8piqSLrYY#p-biomimetics-2026
 - Created 2026-11-25 with project-framework v0.3 (`C:\Users\User\Desktop\dev\project-framework`).
 
@@ -33,6 +33,12 @@ Explanations for humans are in `C:\Users\User\Desktop\dev\project-framework\guid
 | `drive-map.md` | Google Drive folders the session may read: alias, folder ID, content, notes (framework PF-0037). Optional. | When you need files from Drive | Add a row when the user shares a folder. Never list a folder with other people's personal data. |
 | `.cache/` | Drive downloads: `python3 ~/.claude/tools/drive.py fetch <alias>` | Never | Ignored by git. Never commit it. |
 | `site/bionic-rotor/index.html` | Public page (Traditional Chinese): concept, prior art, simulation plan. Source of github.io `biomimetics/bionic-rotor/` (BIO-20261125-0150) | When you change the public page | Edit here, then copy to `lucassullivan0219.github.io/biomimetics/bionic-rotor/` and push to its main. Never put teammates' names here. |
+| `pyproject.toml`, `uv.lock` | Python environment for `sim/` (uv, Python 3.12): numpy, scipy, matplotlib, neuralfoil | When you add a dependency | `uv add <pkg>`; never edit `uv.lock` by hand. |
+| `sim/bemt.py` | BEMT solver (single-unknown phi form, Prandtl tip and hub loss) and NeuralFoil polar tables | When you change the rotor model | Keep the docstring's list of simplifications current. |
+| `sim/validate_da4002.py` | Baseline validation against UIUC DA4002 5x3.75 (BIO-20261126-2302) | When the model changes: rerun `uv run python sim/validate_da4002.py --ncrit 3` | Record new results in a new card (SIM). |
+| `sim/fetch_uiuc.py` | Downloads the UIUC data files into `sim/data/uiuc/` (ignored by git: licence not stated) | Before the first validation run on a machine | Add files to `FILES` when you need another prop. |
+| `sim/data/sda1075.dat` | SDA1075 airfoil coordinates from AIAA 2014-2151 Table 4 | Never edit | Add other airfoils as new files with a source line. |
+| `sim/out/` | Validation plots and JSON (committed); `*.npz` polar caches (ignored) | When you report a result | Regenerate; do not hand-edit. |
 | `zettelkasten/media/BIO-20261125-0153-six-ideas-transcript.md` | The group's six ideas and the leader's boat example (slides 82–88), names removed | When you need the original idea text | Never edit (frozen). |
 
 Add a row for every new file or folder that you create.
@@ -134,9 +140,10 @@ They are the table at the top of `zettelkasten/INDEX.md` (主題入口). When a 
 
 ## 7. Access and storage
 
-- This project is `TLP:RED`. RED = only the user. AMBER+STRICT = the user's organization only. AMBER = the organization and its partners. GREEN = a community, for example a class. CLEAR = everyone.
+- This project is `TLP:CLEAR` (AGREED 2026-11-26, BIO-20261126-2259). RED = only the user. AMBER+STRICT = the user's organization only. AMBER = the organization and its partners. GREEN = a community, for example a class. CLEAR = everyone.
 - The project level is the highest level of anything in it.
-- Only this folder may be published: `site/`. If it is empty, nothing may be published.
+- The whole repo is public: every `git push` publishes. `site/` is also copied to github.io as the showcase page.
+- Do not commit third-party data whose licence is unclear (for example the UIUC measurement files); commit a fetch script instead.
 - Teammates' names are never recorded anywhere in this project, not even in private files (AGREED 2026-11-25, BIO-20261125-0150).
 - Before `git push`, an artifact publish, an upload to a cloud drive, or a call that sends content to an external API, check the content against this list. If anything matches, stop and tell the user:
   1. keys, passwords, tokens;
