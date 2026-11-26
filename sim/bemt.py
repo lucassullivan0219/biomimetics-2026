@@ -64,6 +64,18 @@ class Polar:
         return float(self._icl(p)[0]), float(max(self._icd(p)[0], 1e-4))
 
 
+@dataclass
+class DragOffset:
+    """Wrap a polar and add a constant to Cd (calibration for roughness, low-Re drag, hub drag)."""
+
+    base: Callable[[float, float], tuple[float, float]]
+    dcd: float = 0.0
+
+    def __call__(self, alpha_deg: float, re: float) -> tuple[float, float]:
+        cl, cd = self.base(alpha_deg, re)
+        return cl, cd + self.dcd
+
+
 def neuralfoil_polar(
     coords: np.ndarray,
     cache: Path,

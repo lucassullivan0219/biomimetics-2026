@@ -18,6 +18,7 @@ HERE = Path(__file__).parent
 OUT = HERE.parent / "site" / "bionic-rotor" / "data" / "results.json"
 NCRITS = [0.5, 1, 3, 5, 9]
 CHOSEN = 3
+CAL_DCD = 0.0325  # from calibrate_dcd.py (BIO card on drag calibration)
 POLAR_RE = 2e4  # typical mid-blade Reynolds number at 5000 RPM static
 
 
@@ -27,6 +28,9 @@ def r4(a):
 
 def main() -> None:
     runs = {str(n): json.loads((HERE / "out" / f"da4002_validation_ncrit{n:g}.json").read_text()) for n in NCRITS}
+    cal_key = f"{CHOSEN:g}_dcd{CAL_DCD:g}"
+    runs[cal_key] = json.loads((HERE / "out" / f"da4002_validation_ncrit{CHOSEN:g}_dcd{CAL_DCD:g}.json").read_text())
+    sweep = json.loads((HERE / "out" / "dcd_sweep.json").read_text())
 
     g = v.load_table(v.DATA / "da4002_5x3.75_geom.txt")
     coords = bemt.read_airfoil(HERE / "data" / "sda1075.dat")
@@ -55,6 +59,8 @@ def main() -> None:
     data = {
         "generated": date.today().isoformat(),
         "chosen_ncrit": CHOSEN,
+        "calibrated_key": cal_key,
+        "calibration": sweep,
         "polar_re": POLAR_RE,
         "geometry": {"r_over_R": r4(g[:, 0]), "c_over_R": r4(g[:, 1]), "beta_deg": r4(g[:, 2])},
         "airfoil": {"x": r4(coords[:, 0]), "y": r4(coords[:, 1])},

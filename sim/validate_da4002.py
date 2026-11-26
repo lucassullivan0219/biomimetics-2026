@@ -49,14 +49,15 @@ def make_rotor(polar, n_stations: int = 40) -> bemt.Rotor:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ncrit", type=float, default=9.0)
+    ap.add_argument("--dcd", type=float, default=0.0, help="constant added to every Cd (calibration)")
     args = ap.parse_args()
 
     coords = bemt.read_airfoil(HERE / "data" / "sda1075.dat")
     polar = bemt.neuralfoil_polar(coords, OUT / f"polar_sda1075_ncrit{args.ncrit:g}.npz", n_crit=args.ncrit)
-    rotor = make_rotor(polar)
+    rotor = make_rotor(bemt.DragOffset(polar, args.dcd) if args.dcd else polar)
 
     res: dict = {"run_date": date.today().isoformat(), "n_crit": args.ncrit, "prop": "DA4002 5x3.75",
-                 "polar": "NeuralFoil large", "stations": len(rotor.r_over_R)}
+                 "polar": "NeuralFoil large", "dcd": args.dcd, "stations": len(rotor.r_over_R)}
 
     st = load_table(DATA / "da4002_5x3.75_static_1121md.txt")
     sim_static = [bemt.solve(rotor, 0.0, rpm) for rpm in st[:, 0]]
@@ -112,10 +113,10 @@ def main() -> None:
     ax[1, 1].set(title="efficiency vs J", xlabel="J", ylabel="eta", ylim=(0, 0.8))
     for a in ax.flat:
         a.grid(alpha=0.3)
-    fig.suptitle(f"DA4002 5x3.75: BEMT + NeuralFoil (n_crit={args.ncrit:g}) vs UIUC  [SIM {res['run_date']}]")
+    fig.suptitle(f"DA4002 5x3.75: BEMT + NeuralFoil (n_crit={args.ncrit:g}, dCd={args.dcd:g}) vs UIUC  [SIM {res['run_date']}]")
     fig.tight_layout()
     OUT.mkdir(exist_ok=True)
-    tag = f"ncrit{args.ncrit:g}"
+    tag = f"ncrit{args.ncrit:g}" + (f"_dcd{args.dcd:g}" if args.dcd else "")
     fig.savefig(OUT / f"da4002_validation_{tag}.png", dpi=120)
     (OUT / f"da4002_validation_{tag}.json").write_text(json.dumps(res, indent=1))
 

@@ -82,7 +82,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <h1>仿生靜音旋翼</h1>
   <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
 
-  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬程式已經跟大學風洞實測對過，推力誤差約 5–7%；3D 模型也做好了，下一步是校正阻力，然後加入鯨魚瘤突和貓頭鷹鋸齒。<span class="tag">2026-11-26</span></p>
+  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬已經跟大學風洞實測對過，也校正了阻力：功率誤差降到 ±2%，但推力仍低估 7–9%，懸停時誤差還有 15–18%。3D 模型做好了。下一步：補升力修正，或直接加入仿生特徵。<span class="tag">2026-11-26</span></p>
 
   <ol class="timeline">
     <li class="done"><span class="d">11/24</span>選方向：無人機仿生旋翼（不做電風扇、不做小船）<span class="tag">AGREED</span></li>
@@ -90,7 +90,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     <li class="done"><span class="d">11/26</span>找需求證據：外送無人機的噪音投訴、歐盟噪音上限<span class="tag">REF</span></li>
     <li class="done"><span class="d">11/26</span>寫 BEMT 模擬程式，跟 UIUC 實測對答案<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/26</span>基準槳 3D CAD 模型（下方可旋轉、放大、全螢幕）</li>
-    <li class="now"><span class="d">下一步</span>校正阻力，讓模擬的功率對上實測<span class="tag">OPEN</span></li>
+    <li class="done"><span class="d">11/26</span>阻力校正：功率對上實測（±2%），但推力偏低的問題浮出來（步驟 8）<span class="tag">SIM</span></li>
+    <li class="now"><span class="d">下一步</span>補升力：槳根的旋轉失速延遲，修正懸停推力<span class="tag">OPEN</span></li>
     <li><span class="d">之後</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳</li>
     <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
     <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
@@ -285,17 +286,49 @@ uv run python sim/export_site_data.py</pre>
     </ul>
   </details>
 
+  <details data-charts="calib">
+    <summary>步驟 8　阻力校正：功率對上了，但推力偏低的問題浮出來<span class="tag">SIM 2026-11-26</span></summary>
+    <h3>做法</h3>
+    <ul>
+      <li>每一段、每個攻角的阻力係數都加上同一個常數 ΔCd。它代表模型沒算到的阻力：3D 列印的表面粗糙、低雷諾數的額外阻力、槳轂阻力。<span class="tag">AI likely</span></li>
+      <li><b>只用一份數據來擬合：</b>5,039 RPM 風洞的 CP（CT &gt; 0.03 的 9 個點），找讓「相對誤差的均方根」最小的 ΔCd。<span class="tag">SIM</span></li>
+      <li><b>用沒參與擬合的數據來檢驗：</b>4,031 RPM、6,045 RPM 風洞，以及靜止推力。這樣才知道校正值能不能推廣，而不只是硬湊出來的。</li>
+      <li>掃描 ΔCd = 0 到 0.04，每 0.0025 一格，共 17 次；n_crit 固定為 3。程式：<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/calibrate_dcd.py"><code>sim/calibrate_dcd.py</code></a></li>
+    </ul>
+    <div class="charts">
+      <div class="chart" id="c-cal-fit"></div>
+      <div class="chart" id="c-cal-test"></div>
+    </div>
+    <h3>結果：ΔCd = 0.0325</h3>
+    <div class="tbl" id="t-cal"></div>
+    <div class="charts">
+      <div class="chart" id="c-cal-cp"></div>
+      <div class="chart" id="c-cal-eta"></div>
+      <div class="chart" id="c-cal-st"></div>
+    </div>
+    <ul>
+      <li><b>功率對上了：</b>風洞 CP 平均誤差從 −14% 到 −16%，變成 +0.1%（4,031）、−1.4%（5,039）、−1.4%（6,045）。4,031 和 6,045 RPM 沒參與擬合，也一樣對得上。<span class="tag">SIM</span></li>
+      <li><b>推力更低了：</b>風洞 CT 平均誤差從 −5% 到 −7%，變成 −7% 到 −9%；多出來的阻力會抵掉一點推力。<span class="tag">SIM</span></li>
+      <li><b>效率變成低估：</b>最高效率在校正前高估 0.03–0.06，校正後低估 0.05–0.09。<span class="tag">SIM</span></li>
+      <li><b>懸停修不好：</b>靜止 CP 誤差從 −27.8% 只改善到 −18.4%，CT 從 −13.5% 變成 −14.8%。可見懸停的誤差主要不是阻力造成的。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>ΔCd 很大：</b>Re = 20,000、α = 4° 時，原本 Cd 是 0.038，校正後變成 0.070，等於阻力將近加倍。3D 列印的粗糙表面在低雷諾數下可能真的有這麼大，但沒有量測可以證實。<span class="tag">SIM NeuralFoil</span><span class="tag">AI possible</span></li>
+      <li><b>解讀：</b>模型同時少了升力和阻力。只補阻力，功率會對，但推力不足就露出來了。<span class="tag">AI likely</span></li>
+      <li><b>怎麼用：</b>暫時採用 ΔCd = 0.0325 當作校正後的模型；之後比較仿生槳時，校正前和校正後兩個版本都跑，看結論會不會因此改變。<span class="tag">OPEN，建議兩個都跑</span></li>
+    </ul>
+  </details>
+
   <details>
-    <summary>步驟 8　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <summary>步驟 9　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
     <ul>
       <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異。兩者用同一套方法，系統性誤差大致會互相抵消。<span class="tag">AI possible</span></li>
       <li><b>不能拿來做什麼：</b>直接報告推力和功率的絕對數字，或用它預測噪音。<span class="tag">AI likely</span></li>
-      <li><b>功率偏低的可能原因：</b>NeuralFoil 在低 Re 的阻力偏低、沒算 3D 列印的粗糙度、沒算槳轂阻力。CP 在每個前進比都少約 0.015，很像是固定少了一塊阻力。<span class="tag">AI likely</span></li>
+      <li><b>功率偏低：</b>已用一個固定阻力 ΔCd 校正（步驟 8），風洞功率誤差降到 ±2%。<span class="tag">SIM</span></li>
+      <li><b>推力偏低（7–9%）：</b>阻力校正後更明顯，表示升力也不夠。最可能的來源是槳根大攻角處：旋轉的槳葉會延後失速，2D 翼型數據沒算到。<span class="tag">AI likely</span></li>
       <li><b>靜止推力的趨勢不對：</b>模擬的低雷諾數效應太強，加上槳根失速但沒有旋轉失速延遲修正。<span class="tag">AI possible</span></li>
     </ul>
     <h3>下一步</h3>
     <ol>
-      <li>校正：在 Cd 上加一個固定值（約 +0.01 到 +0.02），讓 CP 對上實測。只加一個參數，避免過度擬合。<span class="tag">OPEN，建議先做這個</span></li>
+      <li>補升力：加上旋轉失速延遲修正（例如 Snel 公式，不需要擬合參數），主要影響懸停和低前進比。<span class="tag">OPEN，建議先做這個</span></li>
       <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據）。<span class="tag">OPEN</span></li>
       <li>用同一套 CAD 程式做出仿生槳的 3D 模型，交給組員列印。<span class="tag">OPEN</span></li>
     </ol>
@@ -348,7 +381,7 @@ uv run python sim/export_site_data.py</pre>
   </details>
 
   <p><small>標籤說明：REF 有出處的事實；OBS 實際觀察或量測；SIM 模擬結果（不是量測）；AI 推論（likely 很可能、possible 可能）；AGREED 已確認的決定；OPEN 還沒決定。實測數據來自 <a href="https://m-selig.ae.illinois.edu/props/propDB.html">UIUC Propeller Data Site</a>。原始碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026">GitHub</a>。</small></p>
-  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-26</footer>
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-26（阻力校正）</footer>
 </main>
 
 <script type="importmap">
@@ -635,6 +668,33 @@ wire.addEventListener('click', () => {
       lineChart(document.getElementById('c-sp-a'), { title: '各段攻角 α（度）', sub: '槳根超過 20°：已失速', xLabel: 'r/R', yLabel: 'α (deg)', series: [{ name: 'α', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.alpha_deg }], digits: 1, yZero: true });
       lineChart(document.getElementById('c-sp-re'), { title: '各段雷諾數 Re', sub: '大部分不到 2.5 萬：低雷諾數', xLabel: 'r/R', yLabel: 'Re', series: [{ name: 'Re', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.re }], digits: 0, yZero: true });
     },
+  };
+
+  draw.calib = function () {
+    const c = D.calibration; const rows = c.rows; const xs = rows.map((r) => r.dcd);
+    const g = (k, m) => rows.map((r) => r.sets[k][m]);
+    lineChart(document.getElementById('c-cal-fit'), { title: '擬合用：5,039 RPM 的誤差均方根（%）', sub: '越低越好；CP 在 ΔCd = 0.0325 最低', xLabel: 'ΔCd', yLabel: 'RMS %', series: [{ name: 'CP', color: '--s1', kind: 'line', x: xs, y: g('5039', 'CP_rms') }, { name: 'CT', color: '--s2', kind: 'line', x: xs, y: g('5039', 'CT_rms') }], digits: 1, yZero: true });
+    lineChart(document.getElementById('c-cal-test'), { title: '檢驗用：CP 平均誤差（%）', sub: '這三組沒參與擬合；0 代表吻合', xLabel: 'ΔCd', yLabel: '誤差 %', series: [{ name: '4,031 RPM', color: '--s1', kind: 'line', x: xs, y: g('4031', 'CP_mean') }, { name: '6,045 RPM', color: '--s2', kind: 'line', x: xs, y: g('6045', 'CP_mean') }, { name: '靜止', color: '--s3', kind: 'line', x: xs, y: g('static', 'CP_mean') }], digits: 1 });
+    const before = D.runs[String(D.chosen_ncrit)], after = D.runs[D.calibrated_key];
+    const pick = (run, rpm) => run.wind_tunnel.find((w) => Math.round(w.rpm) === rpm);
+    const b5 = pick(before, 5039), a5 = pick(after, 5039);
+    const ba = (key, title, yl, extra) => Object.assign({ title, sub: '5,039 RPM（擬合用的那一組）', xLabel: 'J', yLabel: yl, series: [
+      { name: 'UIUC 實測', color: '--s1', kind: 'dots', x: b5.J, y: b5[key + '_meas'] },
+      { name: '校正前', color: '--s2', kind: 'line', x: b5.J, y: b5[key + '_sim'] },
+      { name: '校正後 ΔCd 0.0325', color: '--s3', kind: 'line', x: a5.J, y: a5[key + '_sim'] }] }, extra || {});
+    lineChart(document.getElementById('c-cal-cp'), ba('CP', '功率係數 CP：校正前後', 'CP', { yZero: true }));
+    lineChart(document.getElementById('c-cal-eta'), ba('eta', '效率 η：校正前後', 'η', { yDomain: [0, 0.8], digits: 3 }));
+    lineChart(document.getElementById('c-cal-st'), { title: '靜止 CP：校正前後', sub: '懸停的誤差主要不是阻力造成', xLabel: 'RPM', yLabel: 'CP', series: [
+      { name: 'UIUC 實測', color: '--s1', kind: 'dots', x: before.static.rpm, y: before.static.CP_meas },
+      { name: '校正前', color: '--s2', kind: 'line', x: before.static.rpm, y: before.static.CP_sim },
+      { name: '校正後', color: '--s3', kind: 'line', x: after.static.rpm, y: after.static.CP_sim }], yZero: true });
+    const f1 = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    const r = [4031, 5039, 6045].map((rpm) => {
+      const b = pick(before, rpm), a = pick(after, rpm);
+      return [`${rpm.toLocaleString('en-US')} RPM 風洞${rpm === 5039 ? '（擬合）' : '（檢驗）'}`, f1(b['CT_err_pct_mean_CTgt0.03']), f1(a['CT_err_pct_mean_CTgt0.03']), f1(b['CP_err_pct_mean_CTgt0.03']), f1(a['CP_err_pct_mean_CTgt0.03']), `${b.eta_max_meas.toFixed(2)} / ${b.eta_max_sim.toFixed(2)} / ${a.eta_max_sim.toFixed(2)}`];
+    });
+    r.push(['靜止（檢驗）', f1(before.static.CT_err_pct_mean), f1(after.static.CT_err_pct_mean), f1(before.static.CP_err_pct_mean), f1(after.static.CP_err_pct_mean), '—']);
+    table(document.getElementById('t-cal'), r, ['數據', 'CT 誤差 % 校正前', 'CT 誤差 % 校正後', 'CP 誤差 % 校正前', 'CP 誤差 % 校正後', '最高 η 實測 / 前 / 後']);
   };
 
   const drawn = new Set();
