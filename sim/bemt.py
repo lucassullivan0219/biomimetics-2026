@@ -130,6 +130,9 @@ class Rotor:
     hub_r_over_R: float | None = None
     snel: bool = False  # rotational stall delay on Cl (Snel, Houwink & Piers 1993, QBlade form)
     snel_cap: float | None = 1.0  # upper limit on the Snel factor; None = as published (can exceed 1 when c/r is large)
+    cs: bool = False  # Corrigan-Schillings stall delay (Tangler & Selig 1997 form): shifts lift and drag curves
+    cs_n: float = 1.0  # exponent; Corrigan: 0.8-1.6, n = 1 good for most cases
+    cs_aj: float = 6.0  # deg, where the 2D lift curve is extended (Tangler & Selig: "approximately 6 deg")
 
     def polar_at(self, i: int):
         return self.polar[i] if isinstance(self.polar, list) else self.polar
@@ -169,6 +172,48 @@ def snel_cl(cl2d: float, alpha_deg: float, a0_deg: float, c_over_r: float, lam_f
     return cl2d + f * (cl_inv - cl2d)
 
 
+_ACLMAX_CACHE: dict = {}
+CS_SLOPE = 0.1  # per degree, as in Tangler & Selig 1997 ("0.1 increase in cl for each degree of stall delay")
+
+
+def alpha_clmax_deg(polar, re: float) -> float:
+    """Angle of the first lift peak in 0..25 deg; if the curve has no peak (very low Re), the first angle
+    past the steepest part where the local slope has fallen to 30 % of the steepest slope (an assumption)."""
+    key = (id(polar), round(float(np.log10(max(re, 1.0))), 2))
+    if key not in _ACLMAX_CACHE:
+        a = np.arange(0.0, 25.01, 0.25)
+        cl = np.array([polar(x, re)[0] for x in a])
+        peaks = np.where((cl[1:-1] >= cl[:-2]) & (cl[1:-1] > cl[2:]))[0]
+        if len(peaks):
+            val = float(a[peaks[0] + 1])
+        else:
+            s = np.gradient(cl, a)
+            k = int(np.argmax(s))
+            after = np.where(s[k:] <= 0.3 * s[k])[0]
+            val = float(a[k + after[0]]) if len(after) else float(a[-1])
+        _ACLMAX_CACHE[key] = val
+    return _ACLMAX_CACHE[key]
+
+
+def cs_delay_deg(c_over_r: float, a_clmax: float, a0: float, n: float = 1.0) -> float:
+    """Corrigan-Schillings stall delay angle, as tabulated in Tangler & Selig 1997 (Table 1):
+    K = (0.1517 / (c/r))^(1/1.084);  delta_alpha = (alpha_clmax - alpha_0) * ((K * (c/r) / 0.136)^n - 1)."""
+    K = (0.1517 / c_over_r) ** (1 / 1.084)
+    return (a_clmax - a0) * ((K * c_over_r / 0.136) ** n - 1)
+
+
+def cs_lookup(polar, alpha_deg: float, re: float, d_alpha: float, aj: float) -> tuple[float, float]:
+    """Extend the linear lift curve by d_alpha past aj, then use the 2D curve shifted by d_alpha
+    (lift raised by CS_SLOPE * d_alpha, drag bucket widened by d_alpha)."""
+    if d_alpha <= 0 or alpha_deg <= aj:
+        return polar(alpha_deg, re)
+    if alpha_deg <= aj + d_alpha:
+        cl_j, cd_j = polar(aj, re)
+        return cl_j + CS_SLOPE * (alpha_deg - aj), cd_j
+    cl, cd = polar(alpha_deg - d_alpha, re)
+    return cl + CS_SLOPE * d_alpha, cd
+
+
 def _prandtl(B: int, r: float, R: float, r_hub: float, sphi: float) -> float:
     sphi = max(abs(sphi), 1e-6)
     f_tip = B / 2 * (R - r) / (r * sphi)
@@ -191,12 +236,16 @@ def solve_element(rotor: Rotor, i: int, V: float, omega: float) -> dict:
     if rotor.snel:
         a0 = alpha0_deg(polar, re)
         lam_fac = (omega * r) ** 2 / ((omega * r) ** 2 + V**2) if omega * r > 0 else 0.0  # lam^2/(1+lam^2), lam = Omega r / V
+    if rotor.cs:
+        a_cm = alpha_clmax_deg(polar, re)
+        aj = min(rotor.cs_aj, a_cm)
+        d_alpha = cs_delay_deg(c / r, a_cm, alpha0_deg(polar, re), rotor.cs_n)
 
     def parts(phi: float):
         sphi, cphi = np.sin(phi), np.cos(phi)
         F = _prandtl(B, r, R, r_hub, sphi)
         a = np.degrees(beta - phi)
-        cl, cd = polar(a, re)
+        cl, cd = cs_lookup(polar, a, re, d_alpha, aj) if rotor.cs else polar(a, re)
         if rotor.snel:
             cl = snel_cl(cl, a, a0, c / r, lam_fac, rotor.snel_cap)
         cn = cl * cphi - cd * sphi

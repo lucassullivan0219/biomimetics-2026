@@ -92,6 +92,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     <li class="done"><span class="d">11/26</span>基準槳 3D CAD 模型（下方可旋轉、放大、全螢幕）</li>
     <li class="done"><span class="d">11/26</span>阻力校正：功率對上實測（±2%），但推力偏低的問題浮出來（步驟 8）<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/27</span>升力修正（旋轉失速延遲）：懸停推力對上了，採用「升力＋阻力」模型（步驟 9）<span class="tag">SIM</span></li>
+    <li class="done"><span class="d">11/27</span>換 Corrigan–Schillings 升力模型比較：沒有比 Snel 好，維持 Snel（步驟 10）<span class="tag">SIM</span></li>
     <li class="now"><span class="d">下一步</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳<span class="tag">OPEN</span></li>
     <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
     <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
@@ -359,19 +360,64 @@ uv run python sim/export_site_data.py</pre>
     </ul>
   </details>
 
+  <details data-charts="cs">
+    <summary>步驟 10　換一個升力模型（Corrigan–Schillings）：沒有比 Snel 好，維持 Snel<span class="tag">SIM 2026-11-27</span></summary>
+    <h3>為什麼試這個</h3>
+    <ul>
+      <li>有研究比較了幾種失速延遲模型，發現對低雷諾數小槳，Corrigan–Schillings（下稱 CS）最接近實測。<span class="tag">REF，只讀了摘要</span> <a href="https://www.cambridge.org/core/journals/aeronautical-journal/article/blade-element-momentum-theory-extended-to-model-low-reynolds-number-propeller-performance/39999793AAC5B525A94F63246E5C5533">Aeronautical Journal</a></li>
+      <li>想看它能不能修好 Snel 留下的兩個問題：靜止推力隨轉速的趨勢，以及中段前進比的推力偏低。</li>
+    </ul>
+    <h3>公式</h3>
+    <div class="eq">K = (0.1517 / (c/r))^(1/1.084)</div>
+    <div class="eq">Δα = (α_Clmax − α₀) · [ (K·(c/r) / 0.136)ⁿ − 1 ]，n = 1</div>
+    <div class="eq">α ≤ α_j：不變　　α_j &lt; α ≤ α_j + Δα：Cl 沿 0.1/度 的直線延伸，Cd 停在 Cd(α_j)　　α &gt; α_j + Δα：Cl = Cl₂D(α − Δα) + 0.1·Δα，Cd = Cd₂D(α − Δα)</div>
+    <ul>
+      <li>來源：Corrigan &amp; Schillings 1994（美國直升機學會研討會，原文沒讀到）；公式、n = 1、α_j ≈ 6°、0.1/度都取自 <a href="https://m-selig.web.engr.illinois.edu/pubs/TanglerSelig-1997-Windpower-StallDelay.pdf">Tangler &amp; Selig 1997</a>（從 PDF 的 OCR 文字讀出）。<span class="tag">REF</span></li>
+      <li>跟 Snel 不同：CS 會把升力曲線整條往後推，<b>也會把低阻力區拉寬</b>，所以阻力會變小。<span class="tag">REF</span></li>
+      <li>論文自己也說：它假設 3D 失速後的形狀跟 2D 一樣，這點值得懷疑。<span class="tag">REF</span></li>
+    </ul>
+    <h3>先核對程式有沒有寫對</h3>
+    <ul>
+      <li>用論文 Table 1 的 10 列數字（α_Clmax 9°、α₀ −1.2°）當標準答案：每一列的 Δα 都在 6% 以內；最大差 0.167°，在 c/r = 1。<span class="tag">OBS sim/test_stall_delay.py 2026-11-27</span></li>
+      <li>差距來自論文表上的 K 在 c/r 大時比印出來的公式高約 1%，可能是從圖上讀的。我照公式實作。<span class="tag">AI possible</span></li>
+    </ul>
+    <h3>我加的假設</h3>
+    <div class="tbl"><table>
+      <tr><th>項目</th><th>做法</th><th>理由</th></tr>
+      <tr><td>α_Clmax</td><td>第一個升力峰值；沒有峰值時，取斜率掉到最大斜率 30% 的角度</td><td>NeuralFoil 在 Re 1 萬以下的升力曲線一路平緩上升、沒有峰值；論文沒處理這種情況<span class="tag">AI possible</span></td></tr>
+      <tr><td>α₀</td><td>每個 Re 從極曲線找 Cl = 0</td><td>同步驟 9</td></tr>
+      <tr><td>沿槳葉的 Δα</td><td>大部分 1.4–2.1°；最靠近槳轂一段 6.95°（Re 只有 2,700，α_Clmax 規則找不到位置，退回表的上限 25°）</td><td>那一段貢獻很小<span class="tag">SIM 5,000 RPM</span></td></tr>
+      <tr><td>阻力 ΔCd</td><td>同樣只用 5,039 RPM 重新擬合：結果還是 0.0325</td><td>CP RMS 15.6% → 4.7%（Snel 是 3.6%）<span class="tag">SIM calibrate_dcd.py --cs</span></td></tr>
+    </table></div>
+    <h3>結果</h3>
+    <div class="tbl" id="t-cs"></div>
+    <div class="charts">
+      <div class="chart" id="c-cs-trend"></div>
+      <div class="chart" id="c-cs-cl"></div>
+    </div>
+    <h3>敏感度：n 和 α_j 改一改，結論會不會變</h3>
+    <div class="tbl" id="t-cs-sens"></div>
+    <ul>
+      <li><b>CS 沒有比較好：</b>加上 ΔCd 之後，每一個指標都比 Snel 稍差（靜止 CT −3.1% 對 −1.7%，靜止 CP −17.8% 對 −12.5%，擬合用的 CP RMS 4.7% 對 3.6%）。原因之一是 CS 把低阻區拉寬，功率更低。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>靜止推力的趨勢兩個模型都修不好：</b>不論 Snel 或 CS，誤差都從低轉速的 −6% 到 −10%，一路升到高轉速的 +3% 到 +6%（上圖）。這個斜率來自翼型數據本身的雷諾數效應，不是失速延遲模型能修的。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>中段前進比沒有變：</b>那裡的攻角在 6° 以下，CS 不起作用，所以效率跟原始版本一樣。<span class="tag">SIM</span></li>
+      <li><b>敏感度小：</b>α_j 改成 4° 或 8°，風洞 CT 只差約 1%；n 改成 1.6，靜止 CT 從 −1.7% 變成 +4.1%。<span class="tag">SIM</span></li>
+      <li><b>決定：</b>維持「Snel + ΔCd 0.0325」當目前模型；CS 留在程式裡（<code>--cs</code>）當對照。<span class="tag">AI likely</span></li>
+    </ul>
+  </details>
+
   <details>
-    <summary>步驟 10　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <summary>步驟 11　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
     <ul>
       <li><b>目前的最終模型：</b>BEMT + NeuralFoil（n_crit 3）+ Snel 旋轉失速延遲 + ΔCd 0.0325。<span class="tag">SIM</span></li>
       <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異；推力和功率的絕對值誤差大約在 ±7% 以內（懸停功率除外）。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
       <li><b>不能拿來做什麼：</b>預測噪音；也不能把懸停功率（還低估 12.5%）或效率（低估 0.05–0.09）當絕對值報告。<span class="tag">AI likely</span></li>
-      <li><b>還沒解決：</b>(1) 中段前進比的推力偏低 5–8%；(2) 靜止 CT 隨轉速的趨勢不對，低雷諾數效應太強。兩者可能都來自 NeuralFoil 在 Re 1–3 萬的升力偏低，這需要真的低雷諾數風洞數據才能確認。<span class="tag">AI possible</span></li>
+      <li><b>還沒解決：</b>(1) 中段前進比的推力偏低 5–8%；(2) 靜止 CT 隨轉速的趨勢不對，低雷諾數效應太強。換成 CS 失速延遲模型也修不好（步驟 10），所以兩者比較可能來自 NeuralFoil 在 Re 1–3 萬的翼型數據本身；要確認需要真的低雷諾數風洞數據。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
     </ul>
     <h3>下一步</h3>
     <ol>
       <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據），比較仿生槳和基準槳。<span class="tag">OPEN，建議下一步做這個</span></li>
       <li>用同一套 CAD 程式做出仿生槳的 3D 模型，交給組員列印。<span class="tag">OPEN</span></li>
-      <li>（可選）試 Corrigan–Schillings 失速延遲模型；有研究指出它對低雷諾數小槳比 Snel 準。<span class="tag">REF</span> <a href="https://www.cambridge.org/core/journals/aeronautical-journal/article/blade-element-momentum-theory-extended-to-model-low-reynolds-number-propeller-performance/39999793AAC5B525A94F63246E5C5533">Aeronautical Journal</a><span class="tag">OPEN</span></li>
     </ol>
   </details>
 
@@ -422,7 +468,7 @@ uv run python sim/export_site_data.py</pre>
   </details>
 
   <p><small>標籤說明：REF 有出處的事實；OBS 實際觀察或量測；SIM 模擬結果（不是量測）；AI 推論（likely 很可能、possible 可能）；AGREED 已確認的決定；OPEN 還沒決定。實測數據來自 <a href="https://m-selig.ae.illinois.edu/props/propDB.html">UIUC Propeller Data Site</a>。原始碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026">GitHub</a>。</small></p>
-  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-27（升力修正）</footer>
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-27（升力模型比較）</footer>
 </main>
 
 <script type="importmap">
@@ -771,6 +817,36 @@ wire.addEventListener('click', () => {
     lineChart(document.getElementById('c-snel-cl'), { title: '各段升力係數 Cl（5,000 RPM 靜止）', sub: '槳根的升力被 Snel 修正大幅提高', xLabel: 'r/R', yLabel: 'Cl', series: [
       { name: '原始（2D 數據）', color: '--s2', kind: 'line', x: sp.r_over_R, y: sp.cl },
       { name: '升力＋阻力', color: '--s3', kind: 'line', x: sp.r_over_R, y: sp.cl_final }], digits: 2, yZero: true });
+  };
+
+  draw.cs = function () {
+    const pick = (run, rpm) => run.wind_tunnel.find((w) => Math.round(w.rpm) === rpm);
+    const f1 = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+    const tun = (r, k) => [4031, 5039, 6045].map((rpm) => f1(pick(r, rpm)[k])).join(' / ');
+    const V = [
+      ['原始（無修正）', D.runs[String(D.chosen_ncrit)]],
+      ['Snel', D.runs[D.snel_key]],
+      ['CS', D.runs.cs],
+      ['Snel + ΔCd（採用）', D.runs[D.final_key]],
+      ['CS + ΔCd', D.runs.cs_final],
+    ];
+    table(document.getElementById('t-cs'), V.map(([n, r]) => [n, f1(r.static.CT_err_pct_mean), f1(r.static.CP_err_pct_mean), tun(r, 'CT_err_pct_mean_CTgt0.03'), tun(r, 'CP_err_pct_mean_CTgt0.03')]),
+      ['版本', '靜止 CT %', '靜止 CP %', '風洞 CT %（4031 / 5039 / 6045）', '風洞 CP %']);
+    const S = [['CS n 1、α_j 6°（主要）', D.runs.cs], ['n 1.6', D.runs['cs_n1.6']], ['α_j 4°', D.runs.cs_aj4], ['α_j 8°', D.runs.cs_aj8]];
+    table(document.getElementById('t-cs-sens'), S.map(([n, r]) => [n, f1(r.static.CT_err_pct_mean), f1(r.static.CP_err_pct_mean), f1(avg([4031, 5039, 6045].map((rpm) => pick(r, rpm)['CT_err_pct_mean_CTgt0.03']))), f1(avg([4031, 5039, 6045].map((rpm) => pick(r, rpm)['CP_err_pct_mean_CTgt0.03'])))]),
+      ['設定（都沒加 ΔCd）', '靜止 CT %', '靜止 CP %', '風洞 CT %（平均）', '風洞 CP %（平均）']);
+    const base = D.runs[String(D.chosen_ncrit)];
+    const err = (r) => r.static.CT_sim.map((v, i) => (v / r.static.CT_meas[i] - 1) * 100);
+    lineChart(document.getElementById('c-cs-trend'), { title: '靜止推力誤差隨轉速（%）', sub: '0 代表吻合；兩個模型的斜率都一樣', xLabel: 'RPM', yLabel: '誤差 %', series: [
+      { name: '原始', color: '--s2', kind: 'line', x: base.static.rpm, y: err(base) },
+      { name: 'Snel', color: '--s1', kind: 'line', x: base.static.rpm, y: err(D.runs[D.snel_key]) },
+      { name: 'CS', color: '--s3', kind: 'line', x: base.static.rpm, y: err(D.runs.cs) }], digits: 1 });
+    const sp = D.spanwise;
+    lineChart(document.getElementById('c-cs-cl'), { title: '各段升力係數 Cl（5,000 RPM 靜止）', sub: 'CS 對槳根的提升比 Snel 溫和', xLabel: 'r/R', yLabel: 'Cl', series: [
+      { name: '原始（2D）', color: '--s2', kind: 'line', x: sp.r_over_R, y: sp.cl },
+      { name: 'Snel + ΔCd', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.cl_final },
+      { name: 'CS + ΔCd', color: '--s3', kind: 'line', x: sp.r_over_R, y: sp.cl_cs_final }], digits: 2, yZero: true });
   };
 
   const drawn = new Set();

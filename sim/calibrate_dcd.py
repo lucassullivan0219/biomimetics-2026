@@ -4,7 +4,7 @@ Fit set:  UIUC DA4002 5x3.75 wind tunnel at 5039 RPM (CP, points with CT > 0.03)
 Test set: wind tunnel 4031 and 6045 RPM, and the static sweep.
 Objective: root-mean-square relative CP error on the fit set (thrust is already within ~6 %).
 
-Run:  uv run python sim/calibrate_dcd.py [--snel]   (about 3 min on 8 processes)
+Run:  uv run python sim/calibrate_dcd.py [--snel | --cs]   (about 3 min on 8 processes)
 Writes sim/out/dcd_sweep.json and prints the chosen dCd.
 """
 from __future__ import annotations
@@ -26,12 +26,13 @@ DCDS = [round(x, 4) for x in np.arange(0.0, 0.0401, 0.0025)]
 FIT_RPM = 5039
 
 
-def errors(job: tuple[float, bool]) -> dict:
-    dcd, snel = job
+def errors(job: tuple[float, bool, bool]) -> dict:
+    dcd, snel, cs = job
     coords = bemt.read_airfoil(HERE / "data" / "sda1075.dat")
     polar = bemt.neuralfoil_polar(coords, HERE / "out" / f"polar_sda1075_ncrit{NCRIT:g}.npz", n_crit=NCRIT)
     rotor = v.make_rotor(bemt.DragOffset(polar, dcd))
     rotor.snel = snel
+    rotor.cs = cs
     out = {"dcd": dcd, "sets": {}}
 
     st = v.load_table(v.DATA / "da4002_5x3.75_static_1121md.txt")
@@ -62,13 +63,14 @@ def summarize(ct, cp, ct_m, cp_m, mask) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--snel", action="store_true", help="with Snel stall delay (factor capped at 1)")
+    ap.add_argument("--cs", action="store_true", help="with Corrigan-Schillings stall delay (n 1, from 6 deg)")
     args = ap.parse_args()
     with ProcessPoolExecutor(max_workers=8) as ex:
-        rows = list(ex.map(errors, [(d, args.snel) for d in DCDS]))
+        rows = list(ex.map(errors, [(d, args.snel, args.cs) for d in DCDS]))
     best = min(rows, key=lambda r: r["sets"][str(FIT_RPM)]["CP_rms"])
-    res = {"run_date": date.today().isoformat(), "n_crit": NCRIT, "snel": args.snel, "fit_set": f"{FIT_RPM} RPM wind tunnel CP rms",
+    res = {"run_date": date.today().isoformat(), "n_crit": NCRIT, "snel": args.snel, "cs": args.cs, "fit_set": f"{FIT_RPM} RPM wind tunnel CP rms",
            "chosen_dcd": best["dcd"], "rows": rows}
-    (HERE / "out" / ("dcd_sweep_snel.json" if args.snel else "dcd_sweep.json")).write_text(json.dumps(res, indent=1))
+    (HERE / "out" / ("dcd_sweep_snel.json" if args.snel else "dcd_sweep_cs.json" if args.cs else "dcd_sweep.json")).write_text(json.dumps(res, indent=1))
     print("dCd    | fit 5039 CT/CP rms | 4031 CT/CP mean | 6045 CT/CP mean | static CT/CP mean")
     for r in rows:
         s = r["sets"]
