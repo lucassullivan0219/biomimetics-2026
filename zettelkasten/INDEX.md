@@ -19,6 +19,7 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | 需求證據、噪音投訴、法規 | BIO-20261126-2301 |
 | BEMT 模擬、目前採用的模型、升力修正、Snel、Corrigan–Schillings | BIO-20261127-0044, BIO-20261127-1036 |
 | 基準槳驗證、DA4002、n_crit、阻力校正 | BIO-20261126-2351, BIO-20261126-2302 |
+| 仿生特徵（瘤突、鋸齒）計畫、下一步 | BIO-20261128-1116 |
 | 3D 模型、CAD、列印、建模 skill | BIO-20261126-2326, BIO-20261126-2325 |
 
 ## Cards
@@ -43,3 +44,4 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261126-2351 | 2026-11-26 | result | valid | Drag calibration dCd = 0.0325 — tunnel power within 2 % on held-out RPMs, but thrust 7-9 % low, efficiency now under-predicted, hover not fixed | bemt, calibration, drag |
 | BIO-20261127-0044 | 2026-11-27 | result | valid | Snel stall delay plus dCd 0.0325 adopted — hover thrust -1.7 %, tunnel power within 1 %, mid-J thrust still 5-8 % low, static trend wrong | bemt, stall-delay, snel, calibration |
 | BIO-20261127-1036 | 2026-11-27 | result | valid | Corrigan-Schillings stall delay slightly worse than Snel; neither fixes the static thrust trend — Snel + dCd stays | bemt, stall-delay, corrigan-schillings |
+| BIO-20261128-1116 | 2026-11-28 | decision | valid | Bionic features: tubercles first as modified polars, literature parameters, continue in a new session | bionic-features, tubercles, plan |
