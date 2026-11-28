@@ -20,6 +20,7 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BEMT 模擬、目前採用的模型、升力修正、Snel、Corrigan–Schillings | BIO-20261127-0044, BIO-20261127-1036 |
 | 基準槳驗證、DA4002、n_crit、阻力校正 | BIO-20261126-2351, BIO-20261126-2302 |
 | 仿生特徵（瘤突、鋸齒）計畫、下一步 | BIO-20261128-1116 |
+| 鯨魚瘤突：文獻參數、BEMT 結果、推力損失、CAD | BIO-20261128-1315, BIO-20261128-1314, BIO-20261128-1316 |
 | 3D 模型、CAD、列印、建模 skill | BIO-20261126-2326, BIO-20261126-2325 |
 
 ## Cards
@@ -45,3 +46,6 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261127-0044 | 2026-11-27 | result | valid | Snel stall delay plus dCd 0.0325 adopted — hover thrust -1.7 %, tunnel power within 1 %, mid-J thrust still 5-8 % low, static trend wrong | bemt, stall-delay, snel, calibration |
 | BIO-20261127-1036 | 2026-11-27 | result | valid | Corrigan-Schillings stall delay slightly worse than Snel; neither fixes the static thrust trend — Snel + dCd stays | bemt, stall-delay, corrigan-schillings |
 | BIO-20261128-1116 | 2026-11-28 | decision | valid | Bionic features: tubercles first as modified polars, literature parameters, continue in a new session | bionic-features, tubercles, plan |
+| BIO-20261128-1314 | 2026-11-28 | research | valid | Leading-edge tubercle data at low Reynolds number — Hansen 2010 NACA 0021 curves digitised; three settings chosen | tubercles, literature, low-reynolds |
+| BIO-20261128-1315 | 2026-11-28 | result | valid | Tubercle polars on the DA4002 — all three settings lose 6-23 % hover thrust; none meets the 5 % criterion | tubercles, bemt, thrust-loss |
+| BIO-20261128-1316 | 2026-11-28 | result | valid | CAD model with A2 lambda 7.5 tubercles — dfm timed out; cad inspect overstates spline-loft volumes | cad, tubercles, dfm, volume |

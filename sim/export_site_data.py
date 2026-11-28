@@ -12,6 +12,7 @@ from pathlib import Path
 import numpy as np
 
 import bemt
+import tubercles
 import validate_da4002 as v
 
 HERE = Path(__file__).parent
@@ -76,6 +77,7 @@ def main() -> None:
 
     data = {
         "generated": date.today().isoformat(),
+        "tubercles": tubercle_data(p3),
         "chosen_ncrit": CHOSEN,
         "calibrated_key": cal_key,
         "calibration": sweep,
@@ -93,6 +95,33 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(data, separators=(",", ":")))
     print(f"wrote {OUT} ({OUT.stat().st_size/1024:.1f} KB); static 5000 RPM T={span['T_N']} N CT={span['CT']}")
+
+
+def tubercle_data(p3) -> dict:
+    """Step 11 of the page: source curves, modified polars and the comparison run by tubercle_compare.py."""
+    tc = json.loads((HERE / "out" / "tubercles_compare.json").read_text())
+    alphas = np.arange(-6, 20.01, 0.5)
+    pol = {"baseline": {}}
+    cl, cd = zip(*[p3(a, POLAR_RE) for a in alphas])
+    pol["baseline"] = {"cl": r4(cl), "cd": r4(cd)}
+    for k in tubercles.SETTINGS:
+        tp = tubercles.TuberclePolar(p3, k)
+        cl, cd = zip(*[tp(a, POLAR_RE) for a in alphas])
+        pol[k] = {"cl": r4(cl), "cd": r4(cd)}
+    src = {"baseline": {"alpha": sorted(tubercles.BASE["cl"]), "cl": [tubercles.BASE["cl"][a] for a in sorted(tubercles.BASE["cl"])]}}
+    for k, t in tubercles.SETTINGS.items():
+        src[k] = {"alpha": sorted(t["cl"]), "cl": [t["cl"][a] for a in sorted(t["cl"])]}
+    curves = {}
+    for key, run in tc["runs"].items():
+        st, s5 = run["static"], run["static5000"]
+        t5 = next(t for t in run["tunnel"] if round(t["rpm"]) == 5039)
+        curves[key] = {
+            "static_rpm": st["rpm"], "static_T": r4(st["T"]), "static_P": r4(st["P"]),
+            "J": t5["J"], "CT": r4(t5["CT"]), "CP": r4(t5["CP"]), "eta": [None if e is None else round(e, 4) for e in t5["eta"]],
+            "span_r": r4(s5["r_over_R"]), "span_dT": r4(s5["dT_dr"]), "span_alpha": r4(s5["alpha"]),
+        }
+    return {"run_date": tc["run_date"], "settings": tc["settings"], "compare": tc["compare"],
+            "polar_alpha": r4(alphas), "polars": pol, "source": src, "curves": curves}
 
 
 if __name__ == "__main__":

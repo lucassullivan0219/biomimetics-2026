@@ -82,7 +82,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <h1>仿生靜音旋翼</h1>
   <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
 
-  <p class="oneline"><b>目前進度：</b>基準槳（還沒加仿生特徵）的模擬已經跟大學實測對過，也補了升力和阻力兩個修正：懸停推力誤差 −1.7%、風洞功率誤差 ±1%、風洞推力 −5% 到 −7%。3D 模型做好了。下一步：加入鯨魚瘤突和貓頭鷹鋸齒。<span class="tag">2026-11-27</span></p>
+  <p class="oneline"><b>目前進度：</b>加入了鯨魚前緣瘤突（3 組有實測數據的參數）：最好的一組在同轉速下推力少 6%（另一個模型 −10%），沒有達到「推力損失 &lt; 5%」的標準；3D 瘤突槳已建好。下一步：貓頭鷹尾緣鋸齒。<span class="tag">SIM 2026-11-28</span></p>
 
   <ol class="timeline">
     <li class="done"><span class="d">11/24</span>選方向：無人機仿生旋翼（不做電風扇、不做小船）<span class="tag">AGREED</span></li>
@@ -93,15 +93,18 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     <li class="done"><span class="d">11/26</span>阻力校正：功率對上實測（±2%），但推力偏低的問題浮出來（步驟 8）<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/27</span>升力修正（旋轉失速延遲）：懸停推力對上了，採用「升力＋阻力」模型（步驟 9）<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/27</span>換 Corrigan–Schillings 升力模型比較：沒有比 Snel 好，維持 Snel（步驟 10）<span class="tag">SIM</span></li>
-    <li class="now"><span class="d">下一步</span>加入鯨魚瘤突、貓頭鷹鋸齒，比較仿生槳和基準槳<span class="tag">OPEN</span></li>
+    <li class="done"><span class="d">11/28</span>加入鯨魚前緣瘤突：3 組文獻參數，推力少 6–14%，沒過 5% 標準；3D 瘤突槳建好（步驟 11）<span class="tag">SIM</span></li>
+    <li class="now"><span class="d">下一步</span>加入貓頭鷹尾緣鋸齒，比較仿生槳和基準槳<span class="tag">OPEN</span></li>
     <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
     <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
   </ol>
 
-  <h2>3D 模型：基準槳 DA4002 5×3.75</h2>
+  <h2>3D 模型：基準槳與瘤突槳</h2>
   <div class="viewer" id="viewer" role="application" aria-label="螺旋槳 3D 模型，可拖曳旋轉、縮放">
     <div class="vload" id="vload">載入模型中…（約 8 MB）</div>
     <div class="vbar">
+      <button id="vBase" type="button" aria-pressed="true" data-model="base">基準槳</button>
+      <button id="vTub" type="button" aria-pressed="false" data-model="tub">瘤突槳 A2λ7.5</button>
       <button id="vFull" type="button">全螢幕</button>
       <button id="vReset" type="button">重設視角</button>
       <button id="vSpin" type="button" aria-pressed="false">自動旋轉</button>
@@ -109,7 +112,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     </div>
     <div class="vhint">拖曳：旋轉 · 滾輪或雙指：縮放 · 右鍵或雙指拖曳：平移</div>
   </div>
-  <p><small>這支是 UIUC 設計並 3D 列印測試過的 5 吋雙葉槳，用真實翼型和實測的弦長、扭角建出來，還沒有加仿生特徵。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.step">STEP</a>（CAD 用）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.3mf">3MF</a>（切片軟體用）、<a href="models/da4002_5x3.75.glb">GLB</a>。</small></p>
+  <p><small><b>基準槳</b>是 UIUC 設計並 3D 列印測試過的 5 吋雙葉槳，用真實翼型和實測的弦長、扭角建出來。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.step">STEP</a>（CAD 用）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.3mf">3MF</a>（切片軟體用）、<a href="models/da4002_5x3.75.glb">GLB</a>。<br><b>瘤突槳</b>是同一支槳在前緣加上鯨魚瘤突（高度 = 弦長 3%，間距 = 弦長 11%，約 0.34 mm 高、1.24 mm 一個）。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.step">STEP</a>（18 MB）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.3mf">3MF</a>、<a href="models/da4002_5x3.75_tubercles_A2L7.5.glb">GLB</a>。按「網格線」或放大前緣可以看到波浪。</small></p>
   <details>
     <summary>這個模型怎麼做的、做了哪些假設、能不能直接印</summary>
     <h3>工具：text-to-cad 的 cad skill</h3>
@@ -151,6 +154,16 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
       </li>
       <li>這些是真實翼型本來就有的特性，模型先不改。真的要印時，要把尾緣加厚到約 0.8 mm，這會改變翼型，模擬也要跟著改。<span class="tag">OPEN：建議給列印組員用 SLA 樹脂，或做「尾緣加厚版」再重算一次</span></li>
       <li>網頁顯示的模型是網格化的版本，誤差在 0.02 mm 以內；STEP 檔是精確的 CAD 曲面。<span class="tag">OBS cad model export --tolerance 0.02 --angle 5</span></li>
+    </ul>
+    <h3>瘤突槳怎麼做的（2026-11-28）</h3>
+    <ul>
+      <li>前緣沿著槳葉長度方向做正弦波前後移動，尾緣不動；每個截面整個依新的弦長等比例放大縮小（厚度比例不變）。<span class="tag">AI possible：文獻的做法類似，但細節沒寫</span></li>
+      <li>參數取自 Hansen 等人 2010 測過的 A2λ7.5：瘤突高度 A = 0.03c、間距 λ = 0.11c（見步驟 11）。間距用槳葉中段弦長 0.178R ≈ 11.3 mm 換算成固定的 1.24 mm；高度跟著當地弦長變，所以葉尖的瘤突會變小。<span class="tag">AI possible</span></li>
+      <li>A 當成「波峰到波谷」的總高度。原論文的圖沒講清楚是總高度還是一半；另一篇引用同一組數據的論文兩種寫法都出現過。<span class="tag">OPEN：建議之後查 Hansen 2011 期刊版或博士論文確認</span></li>
+      <li>從 r/R 0.15 開始到 0.99，每個波長切 8 個截面，共 346 個截面，用直紋（ruled）放樣。<span class="tag">OBS cad run 2026-11-28，cad 0.11.18</span></li>
+      <li>檢查：全槳直徑 125.7 mm、高 9.05 mm，跟基準槳一樣。單支槳葉的網格體積 495.8 mm³；把瘤突高度設成 0 時是 495.7 mm³，表示瘤突的凸和凹互相抵消，材料量不變。<span class="tag">OBS 2026-11-28，build123d 匯出 STL 後計算</span></li>
+      <li>注意：<code>cad model inspect</code> 對這種 spline 曲面的體積算不準（同一支基準槳葉：inspect 522.8 mm³，網格 503.7 mm³；直紋放樣時 inspect 只有 389 mm³）。上面基準槳的 2,251 mm³ 因此可能高估約 4%。<span class="tag">OBS 2026-11-28</span></li>
+      <li><b>能不能印：</b>瘤突只有 0.34 mm 高、1.24 mm 一個，FDM（0.4 mm 噴嘴）印不出來，要用 SLA 樹脂。<span class="tag">AI likely</span>（<code>cad model dfm</code> 結果見步驟 11）</li>
     </ul>
   </details>
 
@@ -406,8 +419,82 @@ uv run python sim/export_site_data.py</pre>
     </ul>
   </details>
 
+  <details data-charts="tub">
+    <summary>步驟 11　加入鯨魚前緣瘤突：3 組文獻參數都沒過「推力損失 &lt; 5%」<span class="tag">SIM 2026-11-28</span></summary>
+    <p><b>一句話：</b>最好的一組（瘤突最小、最密）在同轉速下推力少 6.1%、功率少 2.0%、最高效率少約 4%；兩種模型結論一樣：都沒過 5% 標準。<span class="tag">SIM</span></p>
+    <h3>為什麼這樣做</h3>
+    <ul>
+      <li>大翅鯨胸鰭前緣的瘤突會產生成對的順流渦，讓失速變得平緩、延後。<span class="tag">REF</span> <a href="https://people.eng.unimelb.edu.au/imarusic/proceedings/17/329_Paper.pdf">Hansen 等 2010</a></li>
+      <li>BEMT 看不到 3D 形狀，所以把瘤突換成「修改後的 2D 翼型數據」：最大升力、失速後升力、阻力怎麼變，全部照文獻量到的比例改，不自己掃參數。<span class="tag">AGREED 2026-11-28</span></li>
+    </ul>
+    <h3>文獻：找有低雷諾數實測的數據</h3>
+    <div class="tbl"><table>
+      <tr><th>研究</th><th>條件</th><th>讀到多少</th><th>用在哪</th></tr>
+      <tr><td><a href="https://people.eng.unimelb.edu.au/imarusic/proceedings/17/329_Paper.pdf">Hansen, Kelso &amp; Dally 2010</a>（第 17 屆澳洲流體力學會議）</td><td>NACA 0021，弦長 70 mm，Re 120,000，風洞，6 種瘤突</td><td>全文；升力、阻力曲線從圖上用眼睛讀（Cl 約 ±0.02）</td><td>三組設定的數據來源<span class="tag">REF</span></td></tr>
+      <tr><td><a href="https://arxiv.org/abs/2103.08854">Mishra &amp; De（arXiv 2103.08854）</a></td><td>同一個 NACA 0021、Re 120,000，用 DDES 模擬</td><td>全文文字（圖沒讀）</td><td>交叉確認：瘤突越小越密越好<span class="tag">REF</span></td></tr>
+      <tr><td><a href="https://scholarsarchive.byu.edu/facpub/1683">Moore &amp; Ning 2016（BYU）</a></td><td>小型螺旋槳加前緣凸起，風洞</td><td>只讀摘要（全文被擋）</td><td>方向確認：推力和效率都下降<span class="tag">REF</span></td></tr>
+      <tr><td><a href="https://webthesis.biblio.polito.it/33289/">都靈理工碩士論文 2024/25</a></td><td>30 cm 無人機槳加正弦瘤突</td><td>只讀摘要（PDF 16 MB 讀不到）</td><td>沒用到數字</td></tr>
+    </table></div>
+    <p><small>Re 1–5 萬的瘤突實測（例如 NACA 4415 在 Re 5 萬、水洞 Re 1.4 萬）有找到，但全文讀不到，所以沒有用。<span class="tag">OBS Claude 2026-11-28</span></small></p>
+    <h3>挑的三組設定（都是 Hansen 2010 實際測過的）</h3>
+    <div class="tbl" id="t-tub-set"></div>
+    <div class="charts">
+      <div class="chart" id="c-tub-src"></div>
+    </div>
+    <ul>
+      <li>A2λ7.5：論文裡表現最好的一組（瘤突最小、最密）。<span class="tag">REF</span></li>
+      <li>A4λ15：瘤突加倍時，論文找到的最佳間距。<span class="tag">REF</span></li>
+      <li>A4λ7.5：跟第一組同間距、瘤突加倍，看「瘤突變大」的代價。<span class="tag">REF</span></li>
+      <li>三組在 Re 120,000 都讓最大升力下降（−10%、−14%、−21%），失速變平緩，失速前阻力增加 0–19%。論文自己的結論是：低雷諾數下瘤突除了失速後以外沒有明顯好處。<span class="tag">REF</span></li>
+    </ul>
+    <h3>怎麼把論文數據搬到 SDA1075 上（每一步都是假設）</h3>
+    <ol>
+      <li>用「離失速多遠」對齊兩個翼型：s = (α − α₀) / (α_Clmax − α₀)。NACA 0021 的 α₀ = 0、α_Clmax = 12°；SDA1075 的這兩個角度從它自己在當地 Re 的 NeuralFoil 數據找。<span class="tag">AI possible</span></li>
+      <li>失速前：Cl ×（論文的 Cl 瘤突 / Cl 基準），在同一個 s 比較。<span class="tag">AI possible</span></li>
+      <li>失速後：取「SDA1075 原本的 Cl × 失速點的比例」和「SDA1075 最大升力 × 論文瘤突翼型失速後保留的比例」兩者較大的。SDA1075 在 NeuralFoil 裡本來就失速得很平緩，所以通常是前者。<span class="tag">AI possible</span></li>
+      <li>阻力：Cd ×（論文的 Cd 瘤突 / Cd 基準）。失速後論文的比例被基準翼型的「突然失速」主導（Cd 從 0.068 跳到 0.178），SDA1075 沒有這種突變，所以失速後用 8°–12° 的平均比例，8° 到 12° 之間線性過渡。<span class="tag">AI possible</span></li>
+      <li>同樣的比例用在每一個雷諾數。槳葉實際只有 Re 0.3–2.3 萬，比論文低 5 到 40 倍；真實的損失可能更大或更小，不知道。<span class="tag">AI possible</span></li>
+      <li>ΔCd 0.0325 加在改過的 Cd 之後；Snel 修正照常作用在改過的 Cl 上。<span class="tag">AI likely</span></li>
+    </ol>
+    <p>程式：<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/tubercles.py"><code>sim/tubercles.py</code></a>（數據表和對應規則）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/tubercle_compare.py"><code>sim/tubercle_compare.py</code></a>（比較）。</p>
+    <div class="charts">
+      <div class="chart" id="c-tub-cl"></div>
+      <div class="chart" id="c-tub-cd"></div>
+    </div>
+    <h3>結果：同轉速比較</h3>
+    <p>每組都用兩種模型跑：目前模型（Snel + ΔCd 0.0325）和原始模型（只有 n_crit 3）。推力、功率是 5,000 RPM 懸停；風洞是 4,031、5,039、6,045 RPM 的平均（只算基準 CT &gt; 0.03 的點）。</p>
+    <div class="tbl" id="t-tub"></div>
+    <div class="charts">
+      <div class="chart" id="c-tub-st"></div>
+      <div class="chart" id="c-tub-ct"></div>
+      <div class="chart" id="c-tub-eta"></div>
+      <div class="chart" id="c-tub-sp"></div>
+    </div>
+    <h3>解讀</h3>
+    <ul>
+      <li><b>三組都沒過 5%：</b>目前模型下懸停推力 −6.1%、−8.6%、−14.1%；原始模型 −9.8%、−13.8%、−22.7%。各轉速、各前進比的結論都一樣。<span class="tag">SIM</span></li>
+      <li><b>功率只少一點：</b>−1% 到 −3%（懸停），所以同推力時反而更耗電：要把推力補回來，A2λ7.5 約需多 7.7% 功率（原始模型 12.8%）。<span class="tag">SIM</span><span class="tag">AI likely：假設 CT、CP 不隨轉速變</span></li>
+      <li><b>最高效率：</b>A2λ7.5 從 0.52 降到 0.50（5,039 RPM，目前模型），平均 −4%。<span class="tag">SIM</span></li>
+      <li><b>瘤突越大越糟：</b>同間距、瘤突加倍（A2λ7.5 → A4λ7.5），推力損失從 6% 變 14%，跟論文的趨勢一致。<span class="tag">SIM</span><span class="tag">REF</span></li>
+      <li><b>為什麼損失整支槳都有：</b>懸停時槳葉外側四成（r/R 0.6 以外，推力主要來源）的攻角在 7–13°，正好是瘤突讓升力下降最多的範圍（失速前 10–20%）。瘤突的好處是「失速後升力掉得慢」，只會出現在槳根；而 SDA1075 在模擬裡本來就失速得很平緩，這個好處幾乎用不到。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>原始模型損失更大：</b>沒有 Snel 修正時，槳根更依賴 2D 升力，瘤突的折扣直接打在上面。兩種模型方向一致，所以結論不是修正造成的。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>跟前人一致：</b>BYU 的小槳實驗也是推力和效率都下降。<span class="tag">REF，只讀摘要</span></li>
+      <li><b>限制：</b>論文數據在 Re 12 萬，這支槳只有 0.3–2.3 萬；數據是從圖上讀的；瘤突高度是總高還是半高沒確定；BEMT 看不到瘤突的 3D 渦流，也看不到可能的降噪效果。<span class="tag">AI likely</span></li>
+    </ul>
+    <h3>3D 瘤突槳</h3>
+    <ul>
+      <li>做了 A2λ7.5（三組裡最接近過關的），在上方 3D 檢視器按「瘤突槳 A2λ7.5」切換。建模細節在 3D 模型下方的說明裡。<span class="tag">OBS cad 0.11.18</span></li>
+      <li id="tub-dfm">列印檢查（<code>cad model dfm --process printing</code>，SLA 和 FDM）：<b>沒做完</b>，兩次都跑到 1,800 秒上限被停掉，什麼都沒量到；346 個截面、692 個面對這個檢查來說太多。<span class="tag">OBS cad 0.11.18，2026-11-28</span>從尺寸判斷：瘤突 0.34 mm 高、1.24 mm 一個，FDM 印不出來，要用 SLA；尾緣 0.12 mm 太薄的問題跟基準槳一樣。<span class="tag">AI likely</span></li>
+    </ul>
+    <h3>下一步的選擇</h3>
+    <ul>
+      <li>只在槳根加瘤突（那裡本來就失速），外段保持光滑，可能把推力損失壓到 5% 以內。<span class="tag">AI possible</span><span class="tag">OPEN：建議先做貓頭鷹鋸齒，再回頭試「只加在槳根」</span></li>
+      <li>瘤突的降噪效果（如果有）只能靠組員實測；可以把 A2λ7.5 用 SLA 印出來跟基準槳一起量。<span class="tag">OPEN</span></li>
+    </ul>
+  </details>
+
   <details>
-    <summary>步驟 11　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <summary>步驟 12　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
     <ul>
       <li><b>目前的最終模型：</b>BEMT + NeuralFoil（n_crit 3）+ Snel 旋轉失速延遲 + ΔCd 0.0325。<span class="tag">SIM</span></li>
       <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異；推力和功率的絕對值誤差大約在 ±7% 以內（懸停功率除外）。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
@@ -416,8 +503,10 @@ uv run python sim/export_site_data.py</pre>
     </ul>
     <h3>下一步</h3>
     <ol>
-      <li>把鯨魚瘤突、貓頭鷹鋸齒做成「修改後的 2D 翼型數據」，接到程式裡（每一段可以用不同的數據），比較仿生槳和基準槳。<span class="tag">OPEN，建議下一步做這個</span></li>
-      <li>用同一套 CAD 程式做出仿生槳的 3D 模型，交給組員列印。<span class="tag">OPEN</span></li>
+      <li>鯨魚瘤突已做（步驟 11）：三組文獻參數都讓推力少 6% 以上，沒過 5% 標準。<span class="tag">SIM</span></li>
+      <li>貓頭鷹尾緣鋸齒：主要是降噪，BEMT 只算它對推力和阻力的小影響，噪音以組員實測為準。<span class="tag">OPEN，建議下一步做這個</span></li>
+      <li>瘤突改成只加在槳根，再算一次。<span class="tag">OPEN</span></li>
+      <li>把基準槳和 A2λ7.5 瘤突槳交給組員用 SLA 列印、量推力和噪音。<span class="tag">OPEN</span></li>
     </ol>
   </details>
 
@@ -468,7 +557,7 @@ uv run python sim/export_site_data.py</pre>
   </details>
 
   <p><small>標籤說明：REF 有出處的事實；OBS 實際觀察或量測；SIM 模擬結果（不是量測）；AI 推論（likely 很可能、possible 可能）；AGREED 已確認的決定；OPEN 還沒決定。實測數據來自 <a href="https://m-selig.ae.illinois.edu/props/propDB.html">UIUC Propeller Data Site</a>。原始碼：<a href="https://github.com/lucassullivan0219/biomimetics-2026">GitHub</a>。</small></p>
-  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-27（升力模型比較）</footer>
+  <footer>仿生科技課程專題 · © 2026 Lucas Sullivan · 最後更新 2026-11-28（鯨魚前緣瘤突）</footer>
 </main>
 
 <script type="importmap">
@@ -516,10 +605,34 @@ function resize() {
 }
 new ResizeObserver(resize).observe(box);
 
-new GLTFLoader().load('models/da4002_5x3.75.glb', (gltf) => {
-  const root = gltf.scene;
-  scene.add(root);
-  root.traverse((o) => { if (o.isMesh) { meshes.push(o); o.material.side = THREE.DoubleSide; } });
+const MODELS = { base: { url: 'models/da4002_5x3.75.glb', size: '約 8 MB' }, tub: { url: 'models/da4002_5x3.75_tubercles_A2L7.5.glb', size: '約 5 MB' } };
+const cache = {};
+let current = null;
+const loader = new GLTFLoader();
+function showModel(key) {
+  if (current === key) return;
+  document.querySelectorAll('.vbar [data-model]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.model === key)));
+  if (current && cache[current]) scene.remove(cache[current]);
+  current = key;
+  if (cache[key]) { scene.add(cache[key]); meshes = []; cache[key].traverse((o) => { if (o.isMesh) meshes.push(o); }); applyWire(); needsRender = true; return; }
+  const msg = document.createElement('div'); msg.className = 'vload'; msg.textContent = `載入模型中…（${MODELS[key].size}）`; box.appendChild(msg);
+  loader.load(MODELS[key].url, (gltf) => {
+    const root = gltf.scene;
+    root.traverse((o) => { if (o.isMesh) o.material.side = THREE.DoubleSide; });
+    cache[key] = root;
+    msg.remove();
+    if (current !== key) return;
+    scene.add(root);
+    meshes = []; root.traverse((o) => { if (o.isMesh) meshes.push(o); });
+    applyWire();
+    if (!home) frame(root);
+    needsRender = true;
+  }, (e) => {
+    if (e.total) msg.textContent = `載入模型中…${Math.round(e.loaded / e.total * 100)}%`;
+  }, () => { msg.textContent = '模型載入失敗，請重新整理或下載 STEP 檔。'; });
+}
+
+function frame(root) {
   const b = new THREE.Box3().setFromObject(root);
   const size = b.getSize(new THREE.Vector3());
   const center = b.getCenter(new THREE.Vector3());
@@ -535,11 +648,7 @@ new GLTFLoader().load('models/da4002_5x3.75.glb', (gltf) => {
   camera.position.copy(center).add(new THREE.Vector3(0.9, 0.75, 1.1).normalize().multiplyScalar(dist));
   home = { pos: camera.position.clone(), target: controls.target.clone() };
   controls.update();
-  loadMsg.remove();
-  needsRender = true;
-}, (e) => {
-  if (e.total) loadMsg.textContent = `載入模型中…${Math.round(e.loaded / e.total * 100)}%`;
-}, () => { loadMsg.textContent = '模型載入失敗，請重新整理或下載 STEP 檔。'; });
+}
 
 (function loop() {
   requestAnimationFrame(loop);
@@ -573,11 +682,14 @@ spin.addEventListener('click', () => {
   controls.autoRotate = !controls.autoRotate; spin.setAttribute('aria-pressed', String(controls.autoRotate));
 });
 const wire = document.getElementById('vWire');
+function applyWire() { const on = wire.getAttribute('aria-pressed') === 'true'; meshes.forEach((m) => { m.material.wireframe = on; }); }
 wire.addEventListener('click', () => {
-  const on = wire.getAttribute('aria-pressed') !== 'true';
-  meshes.forEach((m) => { m.material.wireframe = on; });
-  wire.setAttribute('aria-pressed', String(on)); needsRender = true;
+  wire.setAttribute('aria-pressed', String(wire.getAttribute('aria-pressed') !== 'true'));
+  applyWire(); needsRender = true;
 });
+document.querySelectorAll('.vbar [data-model]').forEach((b) => b.addEventListener('click', () => showModel(b.dataset.model)));
+loadMsg.remove();
+showModel('base');
 </script>
 
 <script>
@@ -847,6 +959,36 @@ wire.addEventListener('click', () => {
       { name: '原始（2D）', color: '--s2', kind: 'line', x: sp.r_over_R, y: sp.cl },
       { name: 'Snel + ΔCd', color: '--s1', kind: 'line', x: sp.r_over_R, y: sp.cl_final },
       { name: 'CS + ΔCd', color: '--s3', kind: 'line', x: sp.r_over_R, y: sp.cl_cs_final }], digits: 2, yZero: true });
+  };
+
+  draw.tub = function () {
+    const T = D.tubercles; const KS = ['A2L7.5', 'A4L15', 'A4L7.5'];
+    const NAME = { baseline: '基準（光滑）', 'A2L7.5': 'A2λ7.5', 'A4L15': 'A4λ15', 'A4L7.5': 'A4λ7.5' };
+    const C = { baseline: '--ink2', 'A2L7.5': '--s1', 'A4L15': '--s2', 'A4L7.5': '--s3' };
+    const all = ['baseline', ...KS];
+    const dash = (k) => (k === 'baseline' ? '5 4' : '');
+    const f1 = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    table(document.getElementById('t-tub-set'), KS.map((k) => { const t = T.settings[k]; return [NAME[k], t.A_c.toFixed(2), t.lam_c.toFixed(2), f1((t.clmax_ratio - 1) * 100), f1((t.rL_8deg - 1) * 100), f1((t.rD_0deg - 1) * 100), t.fig]; }),
+      ['設定', '高度 A/c', '間距 λ/c', '最大升力 %', '8° 升力 %', '0° 阻力 %', '論文圖']);
+    lineChart(document.getElementById('c-tub-src'), { title: '論文數據：NACA 0021 升力 Cl', sub: 'Hansen 等 2010，Re 120,000，從圖上讀出', xLabel: 'α (deg)', yLabel: 'Cl', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: T.source[k].alpha, y: T.source[k].cl, dash: dash(k) })), digits: 2, yZero: true });
+    const pa = T.polar_alpha;
+    lineChart(document.getElementById('c-tub-cl'), { title: '改過的 SDA1075 升力 Cl', sub: 'Re = 20,000，n_crit 3（未加 Snel、ΔCd）', xLabel: 'α (deg)', yLabel: 'Cl', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: pa, y: T.polars[k].cl, dash: dash(k) })), digits: 3 });
+    lineChart(document.getElementById('c-tub-cd'), { title: '改過的 SDA1075 阻力 Cd', sub: 'Re = 20,000，n_crit 3（未加 ΔCd）', xLabel: 'α (deg)', yLabel: 'Cd', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: pa, y: T.polars[k].cd, dash: dash(k) })), digits: 4, yZero: true });
+    const rows = [];
+    ['current', 'uncorrected'].forEach((m) => {
+      const b = T.compare[`${m}/A2L7.5`];
+      rows.push([`${m === 'current' ? '目前模型' : '原始模型'}　基準`, b.base_static5000_T_N.toFixed(3), b.base_static5000_P_W.toFixed(2), '—', '—', '—', '—', '—']);
+      KS.forEach((k) => {
+        const r = T.compare[`${m}/${k}`];
+        rows.push([`${m === 'current' ? '目前模型' : '原始模型'}　${NAME[k]}`, `${r.static5000_T_N.toFixed(3)}（${f1(r.static5000_T_pct)}）`, `${r.static5000_P_W.toFixed(2)}（${f1(r.static5000_P_pct)}）`, f1(r.tunnel_CT_pct_mean_all), f1(r.tunnel_CP_pct_mean_all), f1(r.eta_max_pct_mean), f1((1 / (1 + r.static5000_T15_over_P_pct / 100) - 1) * 100), r.static5000_T_pct > -5 ? '過' : '沒過']);
+      });
+    });
+    table(document.getElementById('t-tub'), rows, ['版本', '懸停推力 N（%）', '懸停功率 W（%）', '風洞 CT %', '風洞 CP %', '最高效率 %', '同推力功率 %', '推力損失 < 5%']);
+    const cv = (k) => T.curves[`current/${k}`];
+    lineChart(document.getElementById('c-tub-st'), { title: '懸停推力（N）vs 轉速', sub: '目前模型；V = 0', xLabel: 'RPM', yLabel: 'T (N)', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).static_rpm, y: cv(k).static_T, dash: dash(k) })), digits: 3, yZero: true });
+    lineChart(document.getElementById('c-tub-ct'), { title: '推力係數 CT vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'CT', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).CT, dash: dash(k) })) });
+    lineChart(document.getElementById('c-tub-eta'), { title: '效率 η vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'η', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).eta, dash: dash(k) })), yDomain: [0, 0.7], digits: 3 });
+    lineChart(document.getElementById('c-tub-sp'), { title: '沿槳葉的推力分布 dT/dr（N/m）', sub: '目前模型；5,000 RPM 懸停', xLabel: 'r/R', yLabel: 'dT/dr', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).span_r, y: cv(k).span_dT, dash: dash(k) })), digits: 2, yZero: true });
   };
 
   const drawn = new Set();
