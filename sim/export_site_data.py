@@ -78,6 +78,7 @@ def main() -> None:
     data = {
         "generated": date.today().isoformat(),
         "tubercles": tubercle_data(p3),
+        "serrations": serration_data(p3),
         "chosen_ncrit": CHOSEN,
         "calibrated_key": cal_key,
         "calibration": sweep,
@@ -122,6 +123,33 @@ def tubercle_data(p3) -> dict:
         }
     return {"run_date": tc["run_date"], "settings": tc["settings"], "compare": tc["compare"],
             "polar_alpha": r4(alphas), "polars": pol, "source": src, "curves": curves}
+
+
+def serration_data(p3) -> dict:
+    """Step 12 of the page: serrated-span polars and the comparison run by serration_compare.py."""
+    sc = json.loads((HERE / "out" / "serrations_compare.json").read_text())
+    alphas = np.arange(-6, 20.01, 0.5)
+    cl, cd = zip(*[p3(a, POLAR_RE) for a in alphas])
+    pol = {"baseline": {"cl": r4(cl), "cd": r4(cd)}}
+    for k, st in sc["settings"].items():
+        cl, cd = zip(*[p3(a, POLAR_RE) for a in alphas])
+        pol[k] = {"cl": r4(np.array(cl) * st["k_L_measured"]), "cd": r4(np.array(cd) * st["k_D_measured"])}
+    tt = sc["thick_te_polar"]
+    ta = np.array(tt["alpha"])
+    m = (ta >= alphas[0]) & (ta <= alphas[-1])
+    thick = {"alpha": r4(ta[m]), "cl": r4(np.array(tt["cl_2e4"])[m]), "cl_thick": r4(np.array(tt["cl_thick_2e4"])[m]),
+             "cd": r4(np.array(tt["cd_2e4"])[m]), "cd_thick": r4(np.array(tt["cd_thick_2e4"])[m]), "rows": tt["rows"]}
+    curves = {}
+    for key, run in sc["runs"].items():
+        st, s5 = run["static"], run["static5000"]
+        t5 = next(t for t in run["tunnel"] if round(t["rpm"]) == 5039)
+        curves[key] = {
+            "static_rpm": st["rpm"], "static_T": r4(st["T"]), "static_P": r4(st["P"]),
+            "J": t5["J"], "CT": r4(t5["CT"]), "CP": r4(t5["CP"]), "eta": [None if e is None else round(e, 4) for e in t5["eta"]],
+            "span_r": r4(s5["r_over_R"]), "span_dT": r4(s5["dT_dr"]),
+        }
+    return {"run_date": sc["run_date"], "settings": sc["settings"], "compare": sc["compare"], "t_min_mm": sc["t_min_mm"],
+            "polar_alpha": r4(alphas), "polars": pol, "thick": thick, "curves": curves}
 
 
 if __name__ == "__main__":

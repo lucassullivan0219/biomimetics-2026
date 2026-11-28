@@ -22,7 +22,8 @@
 .flow .panel{margin:0}
 .flow b{display:block;margin-bottom:.2em}
 .flow small{color:var(--muted)}
-.tag{display:inline-block;font-size:.72rem;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);margin-left:4px;white-space:nowrap;font-weight:400}
+.tag{display:inline-block;font-size:.72rem;padding:0 6px;border:1px solid var(--line);border-radius:4px;color:var(--muted);margin-left:4px;white-space:nowrap;font-weight:400;max-width:100%}
+li > .tag,td > .tag{white-space:normal}
 details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
 details details{background:transparent}
 summary{cursor:pointer;font-weight:500}
@@ -82,7 +83,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
   <h1>仿生靜音旋翼</h1>
   <p class="lead">把組內票數最高的六個仿生構想，融合在同一支無人機旋翼上：讓城市裡的無人機飛得更安靜，推力也不打折。</p>
 
-  <p class="oneline"><b>目前進度：</b>加入了鯨魚前緣瘤突（3 組有實測數據的參數）：最好的一組在同轉速下推力少 6%（另一個模型 −10%），沒有達到「推力損失 &lt; 5%」的標準；3D 瘤突槳已建好。下一步：貓頭鷹尾緣鋸齒。<span class="tag">SIM 2026-11-28</span></p>
+  <p class="oneline"><b>目前進度：</b>加入了貓頭鷹尾緣鋸齒（3 組文獻做過的設計）：兩組小鋸齒在同轉速下推力只少 3–5%，兩個模型都達到「推力損失 &lt; 5%」；大鋸齒少 12–20%，沒過。鯨魚瘤突三組都沒過。3D 鋸齒槳已建好。下一步：組員列印、實測噪音。<span class="tag">SIM 2026-11-28</span></p>
 
   <ol class="timeline">
     <li class="done"><span class="d">11/24</span>選方向：無人機仿生旋翼（不做電風扇、不做小船）<span class="tag">AGREED</span></li>
@@ -94,17 +95,18 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     <li class="done"><span class="d">11/27</span>升力修正（旋轉失速延遲）：懸停推力對上了，採用「升力＋阻力」模型（步驟 9）<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/27</span>換 Corrigan–Schillings 升力模型比較：沒有比 Snel 好，維持 Snel（步驟 10）<span class="tag">SIM</span></li>
     <li class="done"><span class="d">11/28</span>加入鯨魚前緣瘤突：3 組文獻參數，推力少 6–14%，沒過 5% 標準；3D 瘤突槳建好（步驟 11）<span class="tag">SIM</span></li>
-    <li class="now"><span class="d">下一步</span>加入貓頭鷹尾緣鋸齒，比較仿生槳和基準槳<span class="tag">OPEN</span></li>
-    <li><span class="d">之後</span>組員 3D 列印，量推力和噪音</li>
+    <li class="done"><span class="d">11/28</span>加入貓頭鷹尾緣鋸齒：小鋸齒推力少 3–5%，過 5% 標準；大鋸齒沒過；3D 鋸齒槳建好（步驟 12）<span class="tag">SIM</span></li>
+    <li class="now"><span class="d">下一步</span>組員 3D 列印基準槳和鋸齒槳，量推力和噪音<span class="tag">OPEN</span></li>
     <li><span class="d">12/16</span>期末報告（三）<span class="tag">AGREED</span></li>
   </ol>
 
-  <h2>3D 模型：基準槳與瘤突槳</h2>
+  <h2>3D 模型：基準槳、瘤突槳、鋸齒槳</h2>
   <div class="viewer" id="viewer" role="application" aria-label="螺旋槳 3D 模型，可拖曳旋轉、縮放">
     <div class="vload" id="vload">載入模型中…（約 8 MB）</div>
     <div class="vbar">
       <button id="vBase" type="button" aria-pressed="true" data-model="base">基準槳</button>
       <button id="vTub" type="button" aria-pressed="false" data-model="tub">瘤突槳 A2λ7.5</button>
+      <button id="vSer" type="button" aria-pressed="false" data-model="ser">鋸齒槳 L18</button>
       <button id="vFull" type="button">全螢幕</button>
       <button id="vReset" type="button">重設視角</button>
       <button id="vSpin" type="button" aria-pressed="false">自動旋轉</button>
@@ -112,7 +114,7 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
     </div>
     <div class="vhint">拖曳：旋轉 · 滾輪或雙指：縮放 · 右鍵或雙指拖曳：平移</div>
   </div>
-  <p><small><b>基準槳</b>是 UIUC 設計並 3D 列印測試過的 5 吋雙葉槳，用真實翼型和實測的弦長、扭角建出來。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.step">STEP</a>（CAD 用）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.3mf">3MF</a>（切片軟體用）、<a href="models/da4002_5x3.75.glb">GLB</a>。<br><b>瘤突槳</b>是同一支槳在前緣加上鯨魚瘤突（高度 = 弦長 3%，間距 = 弦長 11%，約 0.34 mm 高、1.24 mm 一個）。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.step">STEP</a>（18 MB）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.3mf">3MF</a>、<a href="models/da4002_5x3.75_tubercles_A2L7.5.glb">GLB</a>。按「網格線」或放大前緣可以看到波浪。</small></p>
+  <p><small><b>基準槳</b>是 UIUC 設計並 3D 列印測試過的 5 吋雙葉槳，用真實翼型和實測的弦長、扭角建出來。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.step">STEP</a>（CAD 用）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75.3mf">3MF</a>（切片軟體用）、<a href="models/da4002_5x3.75.glb">GLB</a>。<br><b>瘤突槳</b>是同一支槳在前緣加上鯨魚瘤突（高度 = 弦長 3%，間距 = 弦長 11%，約 0.34 mm 高、1.24 mm 一個）。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.step">STEP</a>（18 MB）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_tubercles_A2L7.5.3mf">3MF</a>、<a href="models/da4002_5x3.75_tubercles_A2L7.5.glb">GLB</a>。按「網格線」或放大前緣可以看到波浪。<br><b>鋸齒槳</b>是同一支槳在尾緣切出貓頭鷹式鋸齒（深度 = 弦長 10%，間距 = 弦長 20%，約 1.1 mm 深、2.3 mm 一個，r/R 0.30–0.95 共 18 齒），鋸齒段的尾緣加厚到 0.4 mm 讓它印得出來。下載：<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_serrations_L18.step">STEP</a>、<a href="https://github.com/lucassullivan0219/biomimetics-2026/raw/main/cad/exports/da4002_5x3.75_serrations_L18.3mf">3MF</a>、<a href="models/da4002_5x3.75_serrations_L18.glb">GLB</a>。</small></p>
   <details>
     <summary>這個模型怎麼做的、做了哪些假設、能不能直接印</summary>
     <h3>工具：text-to-cad 的 cad skill</h3>
@@ -164,6 +166,15 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:
       <li>檢查：全槳直徑 125.7 mm、高 9.05 mm，跟基準槳一樣。單支槳葉的網格體積 495.8 mm³；把瘤突高度設成 0 時是 495.7 mm³，表示瘤突的凸和凹互相抵消，材料量不變。<span class="tag">OBS 2026-11-28，build123d 匯出 STL 後計算</span></li>
       <li>注意：<code>cad model inspect</code> 對這種 spline 曲面的體積算不準（同一支基準槳葉：inspect 522.8 mm³，網格 503.7 mm³；直紋放樣時 inspect 只有 389 mm³）。上面基準槳的 2,251 mm³ 因此可能高估約 4%。<span class="tag">OBS 2026-11-28</span></li>
       <li><b>能不能印：</b>瘤突只有 0.34 mm 高、1.24 mm 一個，FDM（0.4 mm 噴嘴）印不出來，要用 SLA 樹脂。<span class="tag">AI likely</span>（<code>cad model dfm</code> 結果見步驟 11）</li>
+    </ul>
+    <h3>鋸齒槳怎麼做的（2026-11-28）</h3>
+    <ul>
+      <li>參數取自 Li 等 2018 的 L18：齒深 A = 0.10 × 當地弦長（約 1.0–1.15 mm）、間距 λ = 0.20 × c(0.75R) = 2.29 mm 固定，鋸齒段 r/R 0.30–0.95，每支葉 18 齒（見步驟 12）。<span class="tag">REF</span><span class="tag">AI possible：鋸齒段位置</span></li>
+      <li>鋸齒是「切進弦長」：每半個間距放一個截面，交替「完整翼型（齒尖）」和「在 x/c = 0.9 切掉的翼型（齒谷）」，用直紋（ruled）放樣連起來，邊就是直線的三角齒。原論文的齒尖因為 CNC 刀具是圓的，我們的是尖的。<span class="tag">AI possible</span></li>
+      <li>尾緣加厚：鋸齒段的翼型後段加厚，齒尖 0.40 mm、齒根附近 0.63 mm（原本齒尖只有約 0.13 mm）；跟 <code>sim/serrations.py</code> 的 <code>thickened_coords()</code> 同一條規則，它對翼型數據的影響在步驟 12。<span class="tag">AI possible</span></li>
+      <li>檢查：全槳 125.7 × 16.5 × 9.17 mm（基準 125.7 × 16.42 × 9.06）；單支槳葉的網格是封閉的（每條邊剛好接兩個面）。<span class="tag">OBS cad run + 匯出 STL 0.005 mm 後計算，2026-11-28</span></li>
+      <li>體積：單支槳葉網格體積 508.5 mm³，基準槳葉 508.0 mm³。用截面積積分估：鋸齒段加厚多 19.2 mm³、齒切掉 11.9 mm³，淨多 7.3 mm³；網格只差 0.5 mm³，差別應該來自基準用平滑放樣、鋸齒槳用直紋放樣。<span class="tag">OBS 2026-11-28</span><span class="tag">AI likely：差別的原因</span></li>
+      <li id="ser-dfm-cad"><b>能不能印：</b><code>cad model dfm</code>（SLA，單葉）7 分鐘跑完：FAILED，41 處薄壁低於 1 mm 的通用建議（齒約 0.47 mm；最薄 0.15 mm 在沒加鋸齒的槳根、葉尖原始尾緣），另有 14% 表面朝下角度小於 19°、需要支撐。0.4 mm 對 SLA 是否可行要看機器；FDM（0.4 mm 噴嘴）印不出來。<span class="tag">OBS 2026-11-28</span><span class="tag">AI likely</span></li>
     </ul>
   </details>
 
@@ -493,8 +504,96 @@ uv run python sim/export_site_data.py</pre>
     </ul>
   </details>
 
+  <details data-charts="ser">
+    <summary>步驟 12　加入貓頭鷹尾緣鋸齒：小鋸齒（L18、STE1）兩個模型都過「推力損失 &lt; 5%」，大鋸齒（STE2）沒過<span class="tag">SIM 2026-11-28</span></summary>
+    <p><b>一句話：</b>照文獻量到的推力、功率變化搬到 DA4002 上：L18 懸停推力 −2.8%（原始模型 −4.7%），STE1 −3.1%（−4.5%），都在 5% 以內；STE2 −12.1%（−19.9%）沒過。功率掉得比推力多，所以同推力耗電大致不變。降噪多少 BEMT 算不出來，只能引用文獻、等組員實測。<span class="tag">SIM</span></p>
+    <h3>為什麼這樣做</h3>
+    <ul>
+      <li>貓頭鷹飛羽後緣有細小的梳狀邊緣，被認為能打散尾緣的紊流、降低寬頻噪音；鋸齒尾緣是工程上的仿生版本。兩篇小槳實驗都量到高頻或寬頻噪音下降。<span class="tag">REF</span> <a href="https://www.acoustics.asn.au/conference_proceedings/AAS2018/papers/p22.pdf">Li 等 2018</a>、<a href="https://doi.org/10.1016/j.apacoust.2025.111045">Candeloro 等 2026</a></li>
+      <li>BEMT 看不到 3D 鋸齒，也算不出噪音。所以跟瘤突一樣，把鋸齒換成「鋸齒那一段的 2D 翼型數據要乘多少」，倍數照文獻量到的推力、功率變化換算，不自己掃參數。<span class="tag">AGREED 2026-11-28</span></li>
+    </ul>
+    <h3>文獻：找小槳、低雷諾數（1–10 萬）的實測</h3>
+    <div class="tbl"><table>
+      <tr><th>研究</th><th>條件</th><th>讀到多少</th><th>用在哪</th></tr>
+      <tr><td><a href="https://www.acoustics.asn.au/conference_proceedings/AAS2018/papers/p22.pdf">Li 等 2018</a>（Acoustics 2018，澳洲聲學會議）</td><td>R = 103 mm 雙葉槳，c(0.75R) = 16.3 mm，鋸齒切進弦長；消聲風洞、六分量天平、16 支麥克風；3,000–8,000 RPM，Re 約 4.4 萬（我用尺寸和轉速估的）</td><td>全文；圖用眼睛讀</td><td>設定 L18<span class="tag">REF</span></td></tr>
+      <tr><td><a href="https://doi.org/10.1016/j.apacoust.2025.111045">Candeloro, Ragni &amp; Pagliaroli 2026</a>（Applied Acoustics）＋<a href="https://doi.org/10.2514/6.2024-3107">同作者 AIAA 2024-3107</a></td><td>APC 9×4.7E（直徑 229 mm），23 支不同鋸齒，從尾緣削掉；Re(0.75R) 2.5–3.1 萬；TU Delft 消聲風洞</td><td>全文（TU Delft 開放版本）；圖用眼睛讀</td><td>設定 STE1、STE2<span class="tag">REF</span></td></tr>
+      <tr><td>Ning, Wlezien &amp; Hu 2017（AIAA 2017-3813）</td><td>小槳加鋸齒（加長弦長的做法）</td><td>讀不到（被擋），只有上面兩篇的引用：同推力 3 N 時降噪 0.9–1.6 dB、氣動變化不大</td><td>沒用數字</td></tr>
+    </table></div>
+    <h3>挑的三組設定（都是文獻實際做過、量過的）</h3>
+    <div class="tbl" id="t-ser-set"></div>
+    <ul>
+      <li><b>L18：</b>Li 2018 的設計，齒深 = 弦長 10%、間距 = 弦長 20%。懸停時推力、扭矩、效率都量不出差別；前飛時升力、阻力都少約 5%。我用前飛的 −5% 當保守值。<span class="tag">REF</span><span class="tag">AI possible：選保守值</span></li>
+      <li><b>STE1：</b>Candeloro 的小齒（齒寬 4 mm、齒高 3 mm、5 齒）。論文的 cT 用「削掉後的面積」計算，所以整槳推力要再乘面積比：(1 − 2.5%) × (1 − 2%) ≈ −4.5%。懸停遠場噪音跟基準一樣，前飛約 −2 dB。<span class="tag">REF</span><span class="tag">AI likely：換算方法</span></li>
+      <li><b>STE2：</b>Candeloro 的大齒（6 mm × 6 mm、10 齒），是他們噪音最好的一支；整槳推力 (1 − 12%) × (1 − 10%) ≈ −21%。懸停只有槳盤面方向 −2 dB，其他角度反而更吵。<span class="tag">REF</span></li>
+      <li>Candeloro 沒寫弦長；從論文「h/c = 0.58（h = 8 mm）」推回 c ≈ 13.8 mm，換算出 A/c、λ/c。<span class="tag">AI possible</span></li>
+    </ul>
+    <h3>怎麼把文獻數據搬到 DA4002 上（每一步都是假設）</h3>
+    <ol>
+      <li>鋸齒段的位置：L18 放在 r/R 0.30–0.95（論文圖上整條尾緣都有齒，沒給數字）；STE1、STE2 照原槳「齒數 × 齒寬 ÷ 半徑」的比例（0.175R、0.525R），結束在 r/R 0.95（論文說葉尖附近最重要）。<span class="tag">AI possible</span></li>
+      <li><b>實測換算（主要）：</b>把文獻量到的整槳推力、功率變化全部算在鋸齒段上：Cl 乘 k_L = 1 + ΔT / f_T，Cd 乘 k_D = 1 + ΔP / f_P；f_T、f_P 是基準 DA4002（目前模型、5,000 RPM 懸停）上鋸齒段負擔的推力、功率比例。這個倍數已經包含齒被切掉的面積。<span class="tag">AI possible</span></li>
+      <li><b>只算面積（對照）：</b>鋸齒切進弦長，平均少掉齒深的一半，所以 Cl、Cd 都乘 (1 − A/c ÷ 2)，其他不變。不用任何擬合數字。<span class="tag">AI possible</span></li>
+      <li>同樣的倍數用在每個攻角、每個雷諾數；零升力角和失速角不動（Snel 修正看到的 α₀、α_Clmax 不變）。<span class="tag">AI possible</span></li>
+      <li>ΔCd 0.0325 加在乘倍數之前（它代表單位面積的粗糙度阻力，面積少了它也跟著少）。<span class="tag">AI likely</span></li>
+    </ol>
+    <div class="tbl" id="t-ser-k"></div>
+    <p>程式：<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/serrations.py"><code>sim/serrations.py</code></a>（文獻數字和對應規則）、<a href="https://github.com/lucassullivan0219/biomimetics-2026/blob/main/sim/serration_compare.py"><code>sim/serration_compare.py</code></a>（比較，14 個平行 process，約 5 分鐘）。</p>
+    <div class="charts">
+      <div class="chart" id="c-ser-cl"></div>
+      <div class="chart" id="c-ser-cd"></div>
+    </div>
+    <h3>結果：同轉速比較</h3>
+    <p>每組用兩種對應（實測換算、只算面積）× 兩種模型（目前模型 Snel + ΔCd 0.0325、原始模型只有 n_crit 3）。推力、功率是 5,000 RPM 懸停；風洞是 4,031、5,039、6,045 RPM 的平均（只算基準 CT &gt; 0.03 的點）。</p>
+    <div class="tbl" id="t-ser"></div>
+    <div class="charts">
+      <div class="chart" id="c-ser-st"></div>
+      <div class="chart" id="c-ser-ct"></div>
+      <div class="chart" id="c-ser-eta"></div>
+      <div class="chart" id="c-ser-sp"></div>
+    </div>
+    <h3>判定：推力損失 &lt; 5%？</h3>
+    <div class="tbl"><table>
+      <tr><th>設定</th><th>目前模型</th><th>原始模型</th><th>判定</th></tr>
+      <tr><td>L18（實測換算）</td><td>−2.8%</td><td>−4.7%</td><td><b>兩個都過</b>（原始模型只差 0.3%）<span class="tag">SIM</span></td></tr>
+      <tr><td>L18 列印版（加厚尾緣）</td><td>+2.0%</td><td>+2.4%</td><td><b>兩個都過</b>；推力增加是 NeuralFoil 對鈍尾緣的預測，不一定真的（見下）<span class="tag">SIM</span><span class="tag">AI possible</span></td></tr>
+      <tr><td>STE1（實測換算）</td><td>−3.1%</td><td>−4.5%</td><td><b>兩個都過</b><span class="tag">SIM</span></td></tr>
+      <tr><td>STE2（實測換算）</td><td>−12.1%</td><td>−19.9%</td><td><b>兩個都沒過</b><span class="tag">SIM</span></td></tr>
+    </table></div>
+    <p><small>「只算面積」的對照結論一樣：L18 −2.4% / −4.1%、STE1 −3.0% / −4.4%（過），STE2 −10.6% / −17.3%（沒過）。各轉速、各前進比的結論也一樣。<span class="tag">SIM serration_compare.py 2026-11-28</span></small></p>
+    <h3>解讀</h3>
+    <ul>
+      <li><b>小鋸齒過關：</b>齒深在弦長 10–22% 的兩組（L18、STE1），推力損失 3–5%，在標準以內；但原始模型下都很接近 5%，餘裕很小。<span class="tag">SIM</span></li>
+      <li><b>BEMT 比文獻的整槳損失小：</b>L18 給的是 −5%，模擬只掉 2.8%。原因：升力少一點 → 下洗速度變小 → 攻角變大 → 自己補回一部分。這是模型推出來的，沒有實測確認。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+      <li><b>功率掉得比推力多：</b>所以「同推力要多耗多少電」大約 0%（目前模型）到 +2%（原始模型），最高效率反而高 1–6%。這來自文獻的功率降幅本來就比推力大（Candeloro 的 STE2：cP −14%、cT −12%），不是鋸齒本身變有效率的證明。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
+      <li><b>過了推力標準，不代表過了噪音標準：</b>我們的成功標準是「同推力下 −2 dB 以上」。文獻裡 L18 在懸停時高頻最多 −7.5 dB（低轉速時），轉速越高效果越小；STE1 懸停遠場沒有降噪。所以推力過關的兩組，懸停降噪能不能到 2 dB 不確定。<span class="tag">REF</span><span class="tag">OPEN：建議 L18 印出來給組員量，量 3,000–7,000 RPM 的總聲壓級和高頻段</span></li>
+      <li><b>跟瘤突比：</b>瘤突最好的一組推力少 6.1%（沒過），小鋸齒少 3%（過）。<span class="tag">SIM</span></li>
+    </ul>
+    <h3>尾緣加厚：為了印得出來</h3>
+    <ul>
+      <li>DA4002 的 SDA1075 翼型在尾緣只有 0.13 mm 厚（弦長 11.5 mm），齒尖會比這還薄，印不出來。<span class="tag">OBS 座標計算</span></li>
+      <li>做法：鋸齒段的翼型後段加厚，讓尾緣（齒尖）= 0.4 mm（SLA 樹脂大約可印的下限，未查廠商規格）；加厚量從 x/c = 0.8 平滑增加到齒根 x/c = 0.9，之後固定；上下各加一半，弧線不變。齒根附近 0.63 mm、齒尖 0.40 mm。<span class="tag">AI possible</span></li>
+      <li>代價（NeuralFoil，Re 2 萬）：Cd 多 1–7%（例如 4°：0.0378 → 0.0397）；Cl 反而多 0.02–0.10（4°：0.588 → 0.637）。鈍尾緣有點像小擾流片（Gurney flap），一般會同時增加升力和阻力；但 NeuralFoil 是用 XFOIL 訓練的，XFOIL 對鈍尾緣後方的低壓區（底部阻力）算不準，所以阻力很可能被低估。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
+      <li>把加厚版的翼型數據放進 BEMT（再乘 L18 的倍數），推力 +2.0%（原始模型 +2.4%）、功率 +0.6%，比沒加厚的 L18 還好。這個「變好」很可能是假象；報告時應寫「在模型裡加厚不會讓推力損失超過 5%」，不要寫「加厚會增加推力」。<span class="tag">SIM</span><span class="tag">AI likely</span></li>
+    </ul>
+    <div class="charts">
+      <div class="chart" id="c-ser-thcl"></div>
+      <div class="chart" id="c-ser-thcd"></div>
+    </div>
+    <h3>3D 鋸齒槳</h3>
+    <ul>
+      <li>做了 L18（推力損失最小、有懸停噪音數據），在上方 3D 檢視器按「鋸齒槳 L18」切換。建模細節在 3D 模型下方的說明裡。<span class="tag">OBS cad 0.11.19</span></li>
+      <li id="ser-dfm">列印檢查（<code>cad model dfm --process printing --technology sla</code>，單支槳葉）：這次 7 分鐘跑完，結果 <b>FAILED</b>。齒的壁厚約 0.47 mm，低於 cad 通用規則的 1 mm（無支撐的薄壁）；最薄的 0.15 mm 應該是沒加鋸齒的槳根和葉尖原始尾緣。1 mm 是一般建議，不是某台機器的規格。<span class="tag">OBS cad 0.11.19，2026-11-28</span><span class="tag">OPEN：建議先問列印組員的 SLA 機器能印多薄；要 1 mm 的話，整支尾緣都要加厚，基準槳也一樣，再重算</span></li>
+    </ul>
+    <h3>限制</h3>
+    <ul>
+      <li>沒有低雷諾數的 2D 鋸齒翼型升阻力曲線可用，所以倍數是從「別的槳的整槳變化」換算來的，沒有攻角、雷諾數的依賴性。<span class="tag">AI likely</span></li>
+      <li>鋸齒段在 DA4002 上的位置是我定的；Candeloro 的弦長是推算的。<span class="tag">AI possible</span></li>
+      <li>Li 2018 的齒尖是圓的（CNC），我們的 CAD 是尖的；Candeloro 的槳是 APC 9 吋，比 DA4002 大近一倍。<span class="tag">REF</span></li>
+      <li>BEMT 不能算噪音；所有 dB 數字都是文獻在別的槳上量的。<span class="tag">AGREED 2026-11-25</span></li>
+    </ul>
+  </details>
+
   <details>
-    <summary>步驟 12　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
+    <summary>步驟 13　解讀、限制、下一步<span class="tag">AI</span><span class="tag">OPEN</span></summary>
     <ul>
       <li><b>目前的最終模型：</b>BEMT + NeuralFoil（n_crit 3）+ Snel 旋轉失速延遲 + ΔCd 0.0325。<span class="tag">SIM</span></li>
       <li><b>能拿來做什麼：</b>比較「仿生槳 vs 基準槳」的相對差異；推力和功率的絕對值誤差大約在 ±7% 以內（懸停功率除外）。<span class="tag">SIM</span><span class="tag">AI possible</span></li>
@@ -504,9 +603,10 @@ uv run python sim/export_site_data.py</pre>
     <h3>下一步</h3>
     <ol>
       <li>鯨魚瘤突已做（步驟 11）：三組文獻參數都讓推力少 6% 以上，沒過 5% 標準。<span class="tag">SIM</span></li>
-      <li>貓頭鷹尾緣鋸齒：主要是降噪，BEMT 只算它對推力和阻力的小影響，噪音以組員實測為準。<span class="tag">OPEN，建議下一步做這個</span></li>
-      <li>瘤突改成只加在槳根，再算一次。<span class="tag">OPEN</span></li>
-      <li>把基準槳和 A2λ7.5 瘤突槳交給組員用 SLA 列印、量推力和噪音。<span class="tag">OPEN</span></li>
+      <li>貓頭鷹尾緣鋸齒已做（步驟 12）：小鋸齒 L18、STE1 推力少 3–5%，兩個模型都過 5% 標準；大鋸齒 STE2 少 12–20%，沒過。<span class="tag">SIM</span></li>
+      <li>把基準槳和 L18 鋸齒槳交給組員用 SLA 列印，量推力和噪音（3,000–7,000 RPM，總聲壓級和高頻段），看能不能達到「同推力 −2 dB」。<span class="tag">OPEN，建議下一步做這個</span></li>
+      <li>瘤突改成只加在槳根，再算一次；之後試「槳根瘤突＋外段鋸齒」的組合。<span class="tag">OPEN</span></li>
+      <li>A2λ7.5 瘤突槳也可以一起印，量看看有沒有降噪。<span class="tag">OPEN</span></li>
     </ol>
   </details>
 
@@ -605,7 +705,7 @@ function resize() {
 }
 new ResizeObserver(resize).observe(box);
 
-const MODELS = { base: { url: 'models/da4002_5x3.75.glb', size: '約 8 MB' }, tub: { url: 'models/da4002_5x3.75_tubercles_A2L7.5.glb', size: '約 5 MB' } };
+const MODELS = { base: { url: 'models/da4002_5x3.75.glb', size: '約 8 MB' }, tub: { url: 'models/da4002_5x3.75_tubercles_A2L7.5.glb', size: '約 5 MB' }, ser: { url: 'models/da4002_5x3.75_serrations_L18.glb', size: '約 3 MB' } };
 const cache = {};
 let current = null;
 const loader = new GLTFLoader();
@@ -989,6 +1089,44 @@ showModel('base');
     lineChart(document.getElementById('c-tub-ct'), { title: '推力係數 CT vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'CT', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).CT, dash: dash(k) })) });
     lineChart(document.getElementById('c-tub-eta'), { title: '效率 η vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'η', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).eta, dash: dash(k) })), yDomain: [0, 0.7], digits: 3 });
     lineChart(document.getElementById('c-tub-sp'), { title: '沿槳葉的推力分布 dT/dr（N/m）', sub: '目前模型；5,000 RPM 懸停', xLabel: 'r/R', yLabel: 'dT/dr', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).span_r, y: cv(k).span_dT, dash: dash(k) })), digits: 2, yZero: true });
+  };
+
+  draw.ser = function () {
+    const S = D.serrations; const KS = ['L18', 'STE1', 'STE2'];
+    const NAME = { baseline: '基準（光滑）', L18: 'L18（Li 2018）', STE1: 'STE1（Candeloro 小齒）', STE2: 'STE2（Candeloro 大齒）' };
+    const C = { baseline: '--ink2', L18: '--s1', STE1: '--s2', STE2: '--s3' };
+    const all = ['baseline', ...KS];
+    const dash = (k) => (k === 'baseline' ? '5 4' : '');
+    const f1 = (v) => (v > 0 ? '+' : '') + v.toFixed(1);
+    const pc = (v) => f1(v * 100);
+    const NOISE = { L18: '懸停：高頻最多 −7.5 dB；前飛：最多 −12 dB', STE1: '懸停：跟基準一樣；前飛：約 −2 dB', STE2: '懸停：只有槳盤面 −2 dB，其他角度更吵；前飛：−3 到 −4 dB' };
+    table(document.getElementById('t-ser-set'), KS.map((k) => { const t = S.settings[k]; return [NAME[k], t.A_c.toFixed(2), t.lam_c.toFixed(2), `${t.A_mm_on_da4002} / ${t.lam_mm_on_da4002}`, `${t.r0.toFixed(2)}–${t.r1.toFixed(2)}`, pc(t.dT), pc(t.dP), NOISE[k]]; }),
+      ['設定', '深度 A/c', '間距 λ/c', '在 DA4002 上 A / λ（mm）', '鋸齒段 r/R', '文獻整槳推力 %', '文獻整槳功率 %', '文獻量到的噪音']);
+    table(document.getElementById('t-ser-k'), KS.map((k) => { const t = S.settings[k]; return [NAME[k], (t.f_T * 100).toFixed(0) + '%', (t.f_P * 100).toFixed(0) + '%', t.k_L_measured.toFixed(3), t.k_D_measured.toFixed(3), t.area_factor.toFixed(3)]; }),
+      ['設定', '鋸齒段佔推力', '鋸齒段佔功率', 'Cl 倍數 k_L（實測換算）', 'Cd 倍數 k_D（實測換算）', 'Cl、Cd 倍數（只算面積）']);
+    const pa = S.polar_alpha;
+    lineChart(document.getElementById('c-ser-cl'), { title: '鋸齒段的 SDA1075 升力 Cl', sub: 'Re = 20,000，n_crit 3，「實測換算」對應（未加 Snel、ΔCd）', xLabel: 'α (deg)', yLabel: 'Cl', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: pa, y: S.polars[k].cl, dash: dash(k) })), digits: 3 });
+    lineChart(document.getElementById('c-ser-cd'), { title: '鋸齒段的 SDA1075 阻力 Cd', sub: 'Re = 20,000，n_crit 3（未加 ΔCd）', xLabel: 'α (deg)', yLabel: 'Cd', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: pa, y: S.polars[k].cd, dash: dash(k) })), digits: 4, yZero: true });
+    const th = S.thick;
+    lineChart(document.getElementById('c-ser-thcl'), { title: '尾緣加厚的代價：升力 Cl', sub: `NeuralFoil，Re 20,000，尾緣 0.13 → ${S.t_min_mm} mm（弦長 11.5 mm）`, xLabel: 'α (deg)', yLabel: 'Cl', series: [{ name: '原本 SDA1075', color: '--ink2', kind: 'line', x: th.alpha, y: th.cl, dash: '5 4' }, { name: '加厚版', color: '--s1', kind: 'line', x: th.alpha, y: th.cl_thick }], digits: 3 });
+    lineChart(document.getElementById('c-ser-thcd'), { title: '尾緣加厚的代價：阻力 Cd', sub: '同上', xLabel: 'α (deg)', yLabel: 'Cd', series: [{ name: '原本 SDA1075', color: '--ink2', kind: 'line', x: th.alpha, y: th.cd, dash: '5 4' }, { name: '加厚版', color: '--s1', kind: 'line', x: th.alpha, y: th.cd_thick }], digits: 4, yZero: true });
+    const CASES = [['L18/measured', 'L18　實測換算'], ['L18/thickTE', 'L18　實測換算＋尾緣加厚（列印版）'], ['L18/area', 'L18　只算面積'], ['STE1/measured', 'STE1　實測換算'], ['STE1/area', 'STE1　只算面積'], ['STE2/measured', 'STE2　實測換算'], ['STE2/area', 'STE2　只算面積']];
+    const rows = [];
+    ['current', 'uncorrected'].forEach((m) => {
+      const mn = m === 'current' ? '目前模型' : '原始模型';
+      const b = S.compare[`${m}/L18/measured`];
+      rows.push([`${mn}　基準`, b.base_static5000_T_N.toFixed(3), b.base_static5000_P_W.toFixed(2), '—', '—', '—', '—', '—']);
+      CASES.forEach(([k, n]) => {
+        const r = S.compare[`${m}/${k}`];
+        rows.push([`${mn}　${n}`, `${r.static5000_T_N.toFixed(3)}（${f1(r.static5000_T_pct)}）`, `${r.static5000_P_W.toFixed(2)}（${f1(r.static5000_P_pct)}）`, f1(r.tunnel_CT_pct_mean_all), f1(r.tunnel_CP_pct_mean_all), f1(r.eta_max_pct_mean), f1((1 / (1 + r.static5000_T15_over_P_pct / 100) - 1) * 100), r.static5000_T_pct > -5 ? '過' : '沒過']);
+      });
+    });
+    table(document.getElementById('t-ser'), rows, ['版本', '懸停推力 N（%）', '懸停功率 W（%）', '風洞 CT %', '風洞 CP %', '最高效率 %', '同推力功率 %', '推力損失 < 5%']);
+    const cv = (k) => S.curves[k === 'baseline' ? 'current/baseline' : `current/${k}/measured`];
+    lineChart(document.getElementById('c-ser-st'), { title: '懸停推力（N）vs 轉速', sub: '目前模型；V = 0；實測換算', xLabel: 'RPM', yLabel: 'T (N)', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).static_rpm, y: cv(k).static_T, dash: dash(k) })), digits: 3, yZero: true });
+    lineChart(document.getElementById('c-ser-ct'), { title: '推力係數 CT vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'CT', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).CT, dash: dash(k) })) });
+    lineChart(document.getElementById('c-ser-eta'), { title: '效率 η vs 前進比 J', sub: '目前模型；5,039 RPM 風洞', xLabel: 'J', yLabel: 'η', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).J, y: cv(k).eta, dash: dash(k) })), yDomain: [0, 0.7], digits: 3 });
+    lineChart(document.getElementById('c-ser-sp'), { title: '沿槳葉的推力分布 dT/dr（N/m）', sub: '目前模型；5,000 RPM 懸停', xLabel: 'r/R', yLabel: 'dT/dr', series: all.map((k) => ({ name: NAME[k], color: C[k], kind: 'line', x: cv(k).span_r, y: cv(k).span_dT, dash: dash(k) })), digits: 2, yZero: true });
   };
 
   const drawn = new Set();

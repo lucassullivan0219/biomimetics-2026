@@ -21,6 +21,7 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | 基準槳驗證、DA4002、n_crit、阻力校正 | BIO-20261126-2351, BIO-20261126-2302 |
 | 仿生特徵（瘤突、鋸齒）計畫、下一步 | BIO-20261128-1116 |
 | 鯨魚瘤突：文獻參數、BEMT 結果、推力損失、CAD | BIO-20261128-1315, BIO-20261128-1314, BIO-20261128-1316 |
+| 貓頭鷹尾緣鋸齒：文獻參數、BEMT 結果、推力損失、CAD、尾緣加厚、列印 | BIO-20261128-1718, BIO-20261128-1712, BIO-20261128-1720 |
 | 3D 模型、CAD、列印、建模 skill | BIO-20261126-2326, BIO-20261126-2325 |
 
 ## Cards
@@ -49,3 +50,6 @@ Rewrite this table freely. One row per topic: the words people use for it, and t
 | BIO-20261128-1314 | 2026-11-28 | research | valid | Leading-edge tubercle data at low Reynolds number — Hansen 2010 NACA 0021 curves digitised; three settings chosen | tubercles, literature, low-reynolds |
 | BIO-20261128-1315 | 2026-11-28 | result | valid | Tubercle polars on the DA4002 — all three settings lose 6-23 % hover thrust; none meets the 5 % criterion | tubercles, bemt, thrust-loss |
 | BIO-20261128-1316 | 2026-11-28 | result | valid | CAD model with A2 lambda 7.5 tubercles — dfm timed out; cad inspect overstates spline-loft volumes | cad, tubercles, dfm, volume |
+| BIO-20261128-1712 | 2026-11-28 | research | valid | Trailing-edge serration data on small propellers at Re 2.5-4.4e4 — Li et al. 2018 and Candeloro et al. 2024/2026 read in full; settings L18, STE1, STE2 with thrust, power and dB | serrations, owl, trailing-edge, literature, low-reynolds, propeller, noise |
+| BIO-20261128-1718 | 2026-11-28 | result | valid | Serration polars on the DA4002 — L18 and STE1 lose 3-5 % hover thrust and pass the 5 % criterion in both models; STE2 loses 12-20 % and fails; thickened TE +2 % (likely artefact) | serrations, owl, bemt, thrust-loss, success-criterion, da4002 |
+| BIO-20261128-1720 | 2026-11-28 | result | valid | CAD model with L18 TE serrations and a 0.4 mm thickened TE — closed mesh 508.5 mm3 per blade; SLA dfm finished in 7 min and FAILED on the 1 mm unsupported-wall rule | cad, serrations, owl, 3d-model, dfm, printing, volume, trailing-edge |
